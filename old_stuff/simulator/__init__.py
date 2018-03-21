@@ -1,6 +1,7 @@
 # coding: utf-8
 import pygame
-from twi_bot.simulator.load import load_level
+
+from old_stuff import load_level
 
 
 class Simulator(object):

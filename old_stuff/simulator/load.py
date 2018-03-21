@@ -1,6 +1,6 @@
 # coding: utf-8
-from twi_bot.simulator.common import get_fullpath
-from twi_bot.simulator.sprites import Platform
+from old_stuff import get_fullpath
+from old_stuff.simulator.sprites import Platform
 
 
 def load_level(name):

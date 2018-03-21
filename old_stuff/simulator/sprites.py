@@ -1,6 +1,7 @@
 # coding: utf-8
 import pygame
-from twi_bot.simulator.common import get_fullpath
+
+from old_stuff import get_fullpath
 
 
 class Platform(pygame.sprite.Sprite):
