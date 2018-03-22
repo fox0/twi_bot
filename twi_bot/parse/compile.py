@@ -1,7 +1,8 @@
 #!/usr/bin/env python2
 # coding: utf-8
 import logging
-from twi_bot.tokenizer import tokenizer
+
+from twi_bot.parse.tokenizer import tokenizer
 
 log = logging.getLogger(__name__)
 FUNC_NAME = '__pattern'

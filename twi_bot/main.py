@@ -2,9 +2,10 @@
 # coding: utf-8
 from __future__ import print_function
 import logging
-from twi_bot.compile import load_pattern
-from twi_bot.bot import Bot
-from twi_bot.sensors import RandomSensor
+
+from twi_bot.parse.compile import load_pattern
+from twi_bot.bot.bot import Bot
+from twi_bot.bot.sensors import RandomSensor
 
 log = logging.getLogger(__name__)
 

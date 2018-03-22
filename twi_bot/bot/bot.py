@@ -1,7 +1,8 @@
 # coding: utf-8
 import math
 import logging
-from twi_bot.sensors import BaseSensor
+
+from twi_bot.bot.sensors import BaseSensor
 
 log = logging.getLogger(__name__)
 
