@@ -1,2 +1,4 @@
-.idea/*
-env/*
+.idea/
+env/
+
+twi_bot/patterns/*.py

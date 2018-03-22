@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # coding: utf-8
+import os
 import logging
 
 from twi_bot.parse.tokenizer import tokenizer
@@ -8,29 +9,43 @@ log = logging.getLogger(__name__)
 FUNC_NAME = '__pattern'
 
 
-def load_pattern(filename):
+def load_pattern(filename, is_use_cache=False):
     """
     Подгрузить паттерн из файла
 
     :param filename: имя файла-паттерна
     :return: скомпилированная функция паттерна
     """
-    with open(filename) as f:
-        text = f.read()
+    py = ''
+    if is_use_cache:
+        filename = os.path.abspath(filename)
+        filename_cache = '%s.%s.py' % (filename, os.path.getmtime(filename))
+        if os.path.exists(filename_cache):
+            with open(filename_cache) as f:
+                py = f.read()
 
-    py = _pattern2python(text)
-    log.debug(py)
+    if not py:
+        with open(filename) as f:
+            text = f.read()
+        py = _pattern2python(text, filename)
+        # log.debug(py)
+        if is_use_cache:
+            with open(filename_cache, 'w') as f:
+                f.write(py)
 
-    code = compile(py, '<%s>' % filename, 'exec')
+    f = filename_cache if is_use_cache else '<%s>' % filename
+    code = compile(py, f, 'exec')
     ns = {}
     exec code in ns
     return ns[FUNC_NAME]
 
 
-def _pattern2python(text):
+def _pattern2python(text, filename):
     s = tokenizer(text)
     result = [
         '# coding: utf-8',
+        '\n',
+        '# DO NOT EDIT THIS! Generated from %s' % filename,
         '\n',
         'def %s(bot):' % FUNC_NAME,
         '\n',
