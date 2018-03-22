@@ -25,18 +25,28 @@ def main():
     ]
 
     # todo фильтрация паттернов перед запуском
+    act = make_desision1(bot, patterns, task_params)
 
+
+def make_desision1(bot, patterns, task_params=None):
     acts = bot.make_desision(patterns, task_params)
     log.debug('acts=%s', acts)
     acts2 = sum_result(acts)
     log.info(acts2)
     acts3 = filter(lambda x: x[1] > 0, acts2)
     log.info(acts3)
-    if acts3:
+
+    # todo
+    act = None
+    try:
         act = acts3[0]
-    else:
-        act = acts2[0]
-    log.info('Принято решение выполнить действие "%s"', act[0])
+    except IndexError:
+        try:
+            act = acts2[0]
+        except IndexError:
+            pass
+    log.info('Принято решение выполнить действие "%s"', act)
+    return act
 
 
 def sum_result(acts):
