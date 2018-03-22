@@ -32,7 +32,7 @@ class PatternSensors(object):
     def _add(self, p):
         assert isinstance(p, BaseSensor)
         if p.id in self._avalable:
-            raise Exception('Датчик с id="%s" уже подключен к боту' % p.id)
+            raise ValueError('Датчик с id="%s" уже подключен к боту' % p.id)
         self._avalable.append(p.id)
         self.__setattr__(p.id, p.value)
 
@@ -50,7 +50,7 @@ class PatternAct(object):
     def _add(self, p):
         assert isinstance(p, BaseAct)
         if p.id in self._avalable:
-            raise Exception('Действие с id="%s" уже добавлено к боту' % p.id)
+            raise ValueError('Действие с id="%s" уже добавлено к боту' % p.id)
 
         def func(weight):
             # сюда паттерны складывают предложенные варианты действий
@@ -75,7 +75,7 @@ class PatternTaskParam(object):
     def _add(self, p):
         assert isinstance(p, TaskParam)
         if p.id in self._avalable:
-            raise Exception('Параметр задачи с id="%s" уже добавлен к боту' % p.id)
+            raise ValueError('Параметр задачи с id="%s" уже добавлен к боту' % p.id)
         self._avalable.append(p.id)
         self.__setattr__(p.id, p.value)
 
