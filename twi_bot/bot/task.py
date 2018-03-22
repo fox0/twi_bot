@@ -6,9 +6,9 @@ class TaskParam(object):
     def __init__(self, name_id):
         self.id = name_id
 
-    @property
-    def value(self):
-        raise NotImplementedError
+    # @property
+    # def value(self):
+    #     raise NotImplementedError
 
 
 class RandomTaskParam(TaskParam):

@@ -4,25 +4,74 @@ import logging
 import pygame
 
 from twi_bot.bot.bot import Bot
+from twi_bot.bot.acts import BaseAct
+from twi_bot.bot.sensors import BaseSensor
+from twi_bot.bot.task import TaskParam
 from twi_bot.main import get_patterns, make_desision1
 
 log = logging.getLogger(__name__)
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, coord_goal):
         super(Player, self).__init__()
         self.surf = pygame.Surface((10, 10))
         self.surf.fill((0, 0, 0))
         self.rect = pygame.Rect((x, y, 0, 0))
 
         self.bot = Bot()
+        self.bot.add_act(BaseAct('go_left'))
+        self.bot.add_act(BaseAct('go_up'))
+        self.bot.add_act(BaseAct('go_right'))
+        self.bot.add_act(BaseAct('go_down'))
         self.patterns = get_patterns()
+        self.coord_goal = coord_goal
 
     def update(self):
-        # command, _ = make_desision1(self.bot, self.patterns)
+        # грязный хак
+        self.bot.sensors._avalable = []
+        self.bot.sensors._add(Sensor('wall_l', 100))
+        self.bot.sensors._add(Sensor('wall_r', 100))
+        self.bot.sensors._add(Sensor('wall_u', 100))
+        self.bot.sensors._add(Sensor('wall_d', 100))
+        self.bot.sensors._add(Sensor('coord_x', self.rect.x))
+        self.bot.sensors._add(Sensor('coord_y', self.rect.y))
 
-        self.rect.x += 1
+        task_params = [
+            Param('coord_x', self.coord_goal[0]),
+            Param('coord_y', self.coord_goal[1]),
+        ]
+        command, _ = make_desision1(self.bot, self.patterns, task_params)
+        if command == 'go_right':
+            self.rect.x -= 1
+        elif command == 'go_left':
+            self.rect.x += 1
+        elif command == 'go_down':
+            self.rect.y -= 1
+        elif command == 'go_up':
+            self.rect.y += 1
+        else:
+            raise NotImplementedError
+
+
+class Sensor(BaseSensor):
+    def __init__(self, name_id, value):
+        super(Sensor, self).__init__(name_id)
+        self.value = value
+
+
+class Param(TaskParam):
+    def __init__(self, name_id, value):
+        super(Param, self).__init__(name_id)
+        self.value = value
+
+
+class Goal(pygame.sprite.Sprite):
+    def __init__(self, coord_goal):
+        super(Goal, self).__init__()
+        self.surf = pygame.Surface((10, 10))
+        self.surf.fill((0, 80, 0))
+        self.rect = pygame.Rect((coord_goal[0], coord_goal[1], 0, 0))
 
 
 def main():
@@ -33,7 +82,9 @@ def main():
     background = pygame.Surface((300, 300))
     background.fill((255, 255, 255))
 
-    player = Player(10, 100)
+    coord_goal = (280, 100)
+    player = Player(10, 100, coord_goal)
+    goal = Goal(coord_goal)
 
     timer = pygame.time.Clock()
     while True:
@@ -48,6 +99,7 @@ def main():
         player.update()
 
         screen.blit(background, (0, 0))
+        screen.blit(goal.surf, goal.rect)
         screen.blit(player.surf, player.rect)
         pygame.display.flip()
 
