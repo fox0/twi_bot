@@ -3,13 +3,22 @@
 from __future__ import print_function
 import logging
 from twi_bot.compile import load_pattern
-from twi_bot.bot import Bot, PatternError
+from twi_bot.bot import Bot
 from twi_bot.sensors import RandomSensor
 
 log = logging.getLogger(__name__)
 
 
 def main():
+    bot = get_bot()
+    patterns = get_patterns()
+
+    # todo фильтрация паттернов перед запуском
+    acts = bot.make_desision(patterns)
+    print(acts)
+
+
+def get_bot():
     bot = Bot()
     bot.add_sensor(RandomSensor('coord_x'))
     bot.add_sensor(RandomSensor('coord_y'))
@@ -17,22 +26,16 @@ def main():
     bot.add_sensor(RandomSensor('wall_r'))
     bot.add_sensor(RandomSensor('wall_u'))
     bot.add_sensor(RandomSensor('wall_d'))
+    return bot
 
+
+def get_patterns():
+    # todo добавить у паттерна признак задачи
     patterns = [
         load_pattern('patterns/example1.conf'),
         load_pattern('patterns/example2.conf'),
     ]
-    for pattern in patterns:
-        try:
-            pattern(bot)
-        except PatternError as e:
-            log.error(e)
-
-    # noinspection PyProtectedMember
-    acts = bot.act._selected_action
-    # noinspection PyProtectedMember
-    bot.act._reset_selected_action()
-    print(acts)
+    return patterns
 
 
 if __name__ == '__main__':

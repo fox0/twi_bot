@@ -1,6 +1,9 @@
 # coding: utf-8
 import math
+import logging
 from twi_bot.sensors import BaseSensor
+
+log = logging.getLogger(__name__)
 
 
 class PatternError(Exception):
@@ -38,14 +41,12 @@ class Act(object):
     def __init__(self):
         self._selected_action = []
 
-    def _reset_selected_action(self):
-        self._selected_action = []
-
     def __getattr__(self, item):
         if item not in ['go_left', 'go_right', 'go_up', 'go_down']:  # todo
             raise PatternError('Действия "bot.act.%s" не существует' % item)
 
         def func(weight):
+            # сюда паттерны складывают предложенные варианты действий
             self._selected_action.append((item, weight))
 
         return func
@@ -74,3 +75,20 @@ class Bot(object):
     def add_sensor(self, sensor):
         # noinspection PyProtectedMember
         self.sensors._add(sensor)
+
+    def make_desision(self, patterns):
+        """
+
+        :param patterns: запускаемые паттерны
+        :return: список с предложенными вариантами действий (решения)
+        """
+        for pattern in patterns:
+            try:
+                pattern(self)  # запускаем каждый паттерн
+            except PatternError as e:
+                log.error(e)
+
+        # noinspection PyProtectedMember
+        result = self.act._selected_action
+        self.act._selected_action = []
+        return result
