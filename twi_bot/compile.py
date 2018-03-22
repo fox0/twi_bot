@@ -21,6 +21,16 @@ def load_pattern(filename):
     with open(filename) as f:
         text = f.read()
 
+    py = _pattern2python(text)
+    log.debug(py)
+
+    code = compile(py, '<%s>' % filename, 'exec')
+    ns = {}
+    exec code in ns
+    return ns[FUNC_NAME]
+
+
+def _pattern2python(text):
     s = tokenizer(text)
     result = [
         '# coding: utf-8',
@@ -50,15 +60,8 @@ def load_pattern(filename):
                 result.append('\n')
                 is_begin = True
                 continue
-
-            if tokid == 'ID':
-                # if tokval == 'bot':
-                #     tokid, tokval = next(s)
-                #     if tokid != 'DOT':
-                #         raise ParseError('Ожидалась точка')
-                #     raise NotImplementedError(tokval)
-                if tokval == 'function':
-                    raise NotImplementedError(tokval)
+            if tokid == 'ID' and tokval == 'function':
+                tokval = 'def'
 
             if is_begin and tokid != 'SPACE':
                 el = '%s%s' % (' ' * tabs, tokval)
@@ -69,11 +72,4 @@ def load_pattern(filename):
     except StopIteration:
         r = ''.join(result)
         r2 = [line for line in r.split('\n') if line.strip()]
-        py = '\n'.join(r2)
-
-        log.debug(py)
-
-        code = compile(py, '<%s>' % filename, 'exec')
-        ns = {}
-        exec code in ns
-        return ns[FUNC_NAME]
+        return '\n'.join(r2)
