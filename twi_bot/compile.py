@@ -64,7 +64,7 @@ def _pattern2python(text):
                 tokval = 'def'
 
             if is_begin and tokid != 'SPACE':
-                el = '%s%s' % (' ' * tabs, tokval)
+                el = '%s%s' % (' ' * tabs, tokval)  # todo ставит на 4 пробела больше, чем надо
                 is_begin = False
             else:
                 el = tokval
