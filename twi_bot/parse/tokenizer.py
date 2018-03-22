@@ -51,4 +51,4 @@ def tokenizer(text):
                 yield (pk, m.group(0))
                 break
         if not is_found:
-            raise ParseError('error in line %d:\n%s' % (numline, text.split('\n')[numline - 1]))
+            raise ParseError('Parse error in line %d:\n%s' % (numline, text.split('\n')[numline - 1]))

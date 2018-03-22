@@ -4,6 +4,7 @@ from __future__ import print_function  # , unicode_literals
 import logging
 
 from twi_bot.parse.compile import load_pattern
+from twi_bot.parse.tokenizer import ParseError
 from twi_bot.bot.bot import Bot
 from twi_bot.bot.sensors import RandomSensor
 from twi_bot.bot.acts import BaseAct
@@ -67,11 +68,14 @@ def get_bot():
 
 def get_patterns():
     # todo добавить у паттерна признак задачи
-    patterns = [
-        load_pattern('patterns/example1.conf'),
-        load_pattern('patterns/example2.conf'),
-    ]
-    return patterns
+    result = []
+    ls = ['patterns/example1.conf', 'patterns/example2.conf']
+    for filename in ls:
+        try:
+            result.append(load_pattern(filename))
+        except ParseError as e:
+            log.error('filename=%s\n%s', filename, e)
+    return result
 
 
 if __name__ == '__main__':
