@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # coding: utf-8
-from __future__ import print_function
+from __future__ import print_function  # , unicode_literals
 import logging
 
 from twi_bot.parse.compile import load_pattern
@@ -24,8 +24,27 @@ def main():
     ]
 
     # todo фильтрация паттернов перед запуском
+
     acts = bot.make_desision(patterns, task_params)
-    log.info(acts)
+    log.debug('acts=%s', acts)
+    acts2 = sum_result(acts)
+    log.info(acts2)
+    acts3 = filter(lambda x: x[1] > 0, acts2)
+    log.info(acts3)
+    if acts3:
+        act = acts3[0]
+    else:
+        act = acts2[0]
+    log.info('Принято решение выполнить действие "%s"', act[0])
+
+
+def sum_result(acts):
+    d = {}
+    for act, weight in acts:
+        d[act] = d.get(act, 0) + weight
+    result = [(act, weight) for act, weight in d.items()]
+    result.sort(key=lambda x: -x[1])
+    return result
 
 
 def get_bot():

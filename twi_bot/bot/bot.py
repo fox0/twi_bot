@@ -1,6 +1,7 @@
 # coding: utf-8
 import math
 import logging
+import traceback
 
 from twi_bot.bot.sensors import BaseSensor
 from twi_bot.bot.acts import BaseAct
@@ -113,6 +114,8 @@ class Bot(object):
                 pattern(self)  # запускаем каждый паттерн
             except PatternError as e:
                 log.error(e)
+            except BaseException:
+                log.fatal(traceback.format_exc())
 
         # noinspection PyProtectedMember
         result = self.act._selected
