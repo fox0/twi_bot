@@ -31,10 +31,10 @@ class Player(pygame.sprite.Sprite):
         # грязный хак
         self.bot.sensors._avalable = []
         d = 100
-        if pygame.sprite.spritecollideany(self, walls):  # todo почему-то отскакивает от цели
-            print (1)
-            self.rect.x -= 1
-            d = 0
+        for i in walls:
+            if self.rect.colliderect(i.rect):
+                self.rect.x -= 1
+                d = 0
         self.bot.sensors._add(Sensor('wall_l', 100))
         self.bot.sensors._add(Sensor('wall_r', d))
         self.bot.sensors._add(Sensor('wall_u', 100))
@@ -57,6 +57,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.y -= 1
         else:
             raise NotImplementedError
+        log.debug('x=%d, y=%d', self.rect.x, self.rect.y)
 
 
 class Sensor(BaseSensor):
@@ -98,7 +99,7 @@ def main():
     # all_sprites = pygame.sprite.Group()
 
     coord_goal = (280, 100)
-    player = Player(10, 100, coord_goal)
+    player = Player(10, 200, coord_goal)
     goal = Goal(coord_goal)
 
     walls = pygame.sprite.Group()
