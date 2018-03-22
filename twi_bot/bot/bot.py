@@ -66,8 +66,11 @@ class PatternAct(object):
 class PatternTaskParam(object):
     """Информация о текущей задаче"""
 
-    def __init__(self):
+    def __init__(self, task_params=None):
         self._avalable = []
+        if task_params:
+            for i in task_params:
+                self._add(i)
 
     def _add(self, p):
         assert isinstance(p, TaskParam)
@@ -103,11 +106,7 @@ class Bot(object):
         :param task_params:
         :return: список с предложенными вариантами действий (решения)
         """
-        self.task = PatternTaskParam()
-        if task_params:
-            for i in task_params:
-                # noinspection PyProtectedMember
-                self.task._add(i)
+        self.task = PatternTaskParam(task_params)
 
         for pattern in patterns:
             try:
