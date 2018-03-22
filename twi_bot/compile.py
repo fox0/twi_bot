@@ -7,10 +7,6 @@ log = logging.getLogger(__name__)
 FUNC_NAME = '__pattern'
 
 
-class PatternError(Exception):
-    pass
-
-
 def load_pattern(filename):
     """
     Подгрузить паттерн из файла
