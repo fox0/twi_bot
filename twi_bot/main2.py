@@ -28,12 +28,14 @@ class Player(pygame.sprite.Sprite):
         self.coord_goal = coord_goal
 
     def update(self, walls):
-        # грязный хак
+        step = 1
+        step = 10
+
         self.bot.sensors._avalable = []
         d = 100
         for i in walls:
             if self.rect.colliderect(i.rect):
-                self.rect.x -= 1
+                self.rect.x -= step
                 d = 0
         self.bot.sensors._add(Sensor('wall_l', 100))
         self.bot.sensors._add(Sensor('wall_r', d))
@@ -48,13 +50,13 @@ class Player(pygame.sprite.Sprite):
         ]
         command, _ = make_desision1(self.bot, self.patterns, task_params)
         if command == 'go_right':
-            self.rect.x += 1
+            self.rect.x += step
         elif command == 'go_left':
-            self.rect.x -= 1
+            self.rect.x -= step
         elif command == 'go_down':
-            self.rect.y += 1
+            self.rect.y += step
         elif command == 'go_up':
-            self.rect.y -= 1
+            self.rect.y -= step
         else:
             raise NotImplementedError
         log.debug('x=%d, y=%d', self.rect.x, self.rect.y)
@@ -95,19 +97,25 @@ def main():
 
     background = pygame.Surface((300, 300))
     background.fill((255, 255, 255))
+    screen.blit(background, (0, 0))
 
     # all_sprites = pygame.sprite.Group()
 
     coord_goal = (280, 100)
-    player = Player(10, 200, coord_goal)
+    # player = Player(10, 200, coord_goal)
+    player = Player(10, 100, coord_goal)
     goal = Goal(coord_goal)
 
     walls = pygame.sprite.Group()
-    walls.add(Wall(200, 100))
+    walls.add(Wall(50, 100))
+    walls.add(Wall(80, 110))
+    walls.add(Wall(100, 100))
+    walls.add(Wall(170, 110))
+    walls.add(Wall(210, 100))
 
     timer = pygame.time.Clock()
     while True:
-        timer.tick(60)
+        timer.tick(10)
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 return
@@ -117,7 +125,7 @@ def main():
 
         player.update(walls)
 
-        screen.blit(background, (0, 0))
+        # screen.blit(background, (0, 0))
         for i in walls:
             screen.blit(i.surf, i.rect)
         screen.blit(goal.surf, goal.rect)

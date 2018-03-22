@@ -121,3 +121,6 @@ class Bot(object):
         result = self.act._selected
         self.act._selected = []
         return result
+
+    def __getattr__(self, item):
+        raise PatternError('"bot.%s" не существует' % item)

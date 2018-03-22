@@ -28,7 +28,7 @@ def load_pattern(filename, is_use_cache=False):
         with open(filename) as f:
             text = f.read()
         py = _pattern2python(text, filename)
-        # log.debug(py)
+        log.debug('\n%s', py)
         if is_use_cache:
             with open(filename_cache, 'w') as f:
                 f.write(py)
@@ -41,6 +41,7 @@ def load_pattern(filename, is_use_cache=False):
 
 
 def _pattern2python(text, filename):
+    text = '\n'.join(line.strip() for line in text.split('\n'))
     s = tokenizer(text)
     result = [
         '# coding: utf-8',
@@ -63,6 +64,9 @@ def _pattern2python(text, filename):
                 continue
             if tokid == 'BEGIN_BLOCK':
                 tabs += 4
+                el = result.pop()
+                if el != ' ':
+                    result.append(el)
                 result.append(':')
                 result.append('\n')
                 is_begin = True
@@ -76,7 +80,7 @@ def _pattern2python(text, filename):
                 tokval = 'def'
 
             if is_begin and tokid != 'SPACE':
-                el = '%s%s' % (' ' * tabs, tokval)  # todo ставит на 4 пробела больше, чем надо
+                el = '%s%s' % (' ' * tabs, tokval)
                 is_begin = False
             else:
                 el = tokval
