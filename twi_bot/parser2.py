@@ -7,27 +7,30 @@ from collections import namedtuple
 # Token = namedtuple('Token', ['tok', 'value'])
 
 tokens = {
-    'ID': re.compile(r'^[_\w][_\w\d]+'),
+    'ID': re.compile(r'^[_\w][_\w\d]*'),
     'COMMENT1': re.compile(r'^#.*(?<!\n)'),
-    'COMMENT2': re.compile(r'^//.*(?<!\n)'),
+    # 'COMMENT2': re.compile(r'^//.*(?<!\n)'),
     # 'COMMENT2': re.compile(r'^\/\*.*?\*\/'),  # /* */
-    'NEWLINE': re.compile(r'\n'),
-    'CONST1': re.compile(r'[1-9]\d*'),
-    'CONST2': re.compile(r'\d+\.\d+'),
+    'NEWLINE': re.compile(r'^\n'),
+    'CONST1': re.compile(r'^[1-9]\d*'),
+    'CONST2': re.compile(r'^\d+\.\d+'),
 
-    'DOT': re.compile(r'\.'),
-    'BEGIN_BLOCK': re.compile(r'{'),
-    'END_BLOCK': re.compile(r'}'),
+    'BEGIN_BLOCK': re.compile(r'^{'),
+    'END_BLOCK': re.compile(r'^}'),
+    '(': re.compile(r'^\('),
+    ')': re.compile(r'^\)'),
 
-    'MINUS': re.compile(r'-'),
-    '(': re.compile(r'\('),
-    '}': re.compile(r'\)'),
-    '=': re.compile(r'='),
-    '<': re.compile(r'<'),
-    '>': re.compile(r'>'),
-    '<=': re.compile(r'<='),
-    '=>': re.compile(r'=>'),
-    '==': re.compile(r'=='),
+    'DOT': re.compile(r'^\.'),
+    ',': re.compile(r'^,'),
+
+    '-': re.compile(r'^-'),
+    '+': re.compile(r'^\+'),
+    '*': re.compile(r'^\*'),
+    '/': re.compile(r'^/'),
+
+    '=': re.compile(r'^='),
+    '<': re.compile(r'^<'),
+    '>': re.compile(r'^>'),
 }
 
 
