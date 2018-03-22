@@ -17,7 +17,7 @@ class Player(pygame.sprite.Sprite):
         super(Player, self).__init__()
         self.surf = pygame.Surface((10, 10))
         self.surf.fill((0, 0, 0))
-        self.rect = pygame.Rect((x, y, 0, 0))
+        self.rect = pygame.Rect((x, y, 10, 10))
 
         self.bot = Bot()
         self.bot.add_act(BaseAct('go_left'))
@@ -27,11 +27,16 @@ class Player(pygame.sprite.Sprite):
         self.patterns = get_patterns()
         self.coord_goal = coord_goal
 
-    def update(self):
+    def update(self, walls):
         # грязный хак
         self.bot.sensors._avalable = []
+        d = 100
+        if pygame.sprite.spritecollideany(self, walls):  # todo почему-то отскакивает от цели
+            print (1)
+            self.rect.x -= 1
+            d = 0
         self.bot.sensors._add(Sensor('wall_l', 100))
-        self.bot.sensors._add(Sensor('wall_r', 100))
+        self.bot.sensors._add(Sensor('wall_r', d))
         self.bot.sensors._add(Sensor('wall_u', 100))
         self.bot.sensors._add(Sensor('wall_d', 100))
         self.bot.sensors._add(Sensor('coord_x', self.rect.x))
@@ -43,13 +48,13 @@ class Player(pygame.sprite.Sprite):
         ]
         command, _ = make_desision1(self.bot, self.patterns, task_params)
         if command == 'go_right':
-            self.rect.x -= 1
-        elif command == 'go_left':
             self.rect.x += 1
+        elif command == 'go_left':
+            self.rect.x -= 1
         elif command == 'go_down':
-            self.rect.y -= 1
-        elif command == 'go_up':
             self.rect.y += 1
+        elif command == 'go_up':
+            self.rect.y -= 1
         else:
             raise NotImplementedError
 
@@ -70,8 +75,16 @@ class Goal(pygame.sprite.Sprite):
     def __init__(self, coord_goal):
         super(Goal, self).__init__()
         self.surf = pygame.Surface((10, 10))
-        self.surf.fill((0, 80, 0))
-        self.rect = pygame.Rect((coord_goal[0], coord_goal[1], 0, 0))
+        self.surf.fill((0, 255, 0))
+        self.rect = pygame.Rect((coord_goal[0], coord_goal[1], 10, 10))
+
+
+class Wall(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super(Wall, self).__init__()
+        self.surf = pygame.Surface((10, 10))
+        self.surf.fill((255, 0, 0))
+        self.rect = pygame.Rect((x, y, 10, 10))
 
 
 def main():
@@ -82,9 +95,14 @@ def main():
     background = pygame.Surface((300, 300))
     background.fill((255, 255, 255))
 
+    # all_sprites = pygame.sprite.Group()
+
     coord_goal = (280, 100)
     player = Player(10, 100, coord_goal)
     goal = Goal(coord_goal)
+
+    walls = pygame.sprite.Group()
+    walls.add(Wall(200, 100))
 
     timer = pygame.time.Clock()
     while True:
@@ -96,9 +114,11 @@ def main():
                 if e.key == pygame.K_ESCAPE:
                     return
 
-        player.update()
+        player.update(walls)
 
         screen.blit(background, (0, 0))
+        for i in walls:
+            screen.blit(i.surf, i.rect)
         screen.blit(goal.surf, goal.rect)
         screen.blit(player.surf, player.rect)
         pygame.display.flip()
