@@ -1,91 +1,92 @@
 #!/usr/bin/env python2
 # coding: utf-8
 import os
+import marshal
 import logging
 
-from twi_bot.parse.tokenizer import tokenizer
+from twi_bot.parse.tokenize import tokenize
+from twi_bot.parse.tokens import *
 
 log = logging.getLogger(__name__)
 FUNC_NAME = '__pattern'
 
 
-def load_pattern(filename, is_use_cache=False):
+def load_pattern(filename_pattern):
     """
-    Подгрузить паттерн из файла
+    Загрузить паттерн из файла
 
-    :param filename: имя файла-паттерна
+    :param filename_pattern: имя файла-паттерна
     :return: скомпилированная функция паттерна
     """
-    py = ''
-    if is_use_cache:
-        filename = os.path.abspath(filename)
-        filename_cache = '%s.%s.py' % (filename, os.path.getmtime(filename))
-        if os.path.exists(filename_cache):
-            with open(filename_cache) as f:
-                py = f.read()
-
-    if not py:
-        with open(filename) as f:
+    filename_bytecode = '%s_%s.pyc' % (os.path.abspath(filename_pattern), os.path.getmtime(filename_pattern))
+    if os.path.exists(filename_bytecode):
+        log.debug('load bytecodes from %s', filename_bytecode)
+        with open(filename_bytecode, 'rb') as f:
+            code = marshal.load(f)
+    else:
+        log.debug('load pattern from %s', filename_pattern)
+        with open(filename_pattern) as f:
             text = f.read()
-        py = _pattern2python(text, filename)
+        py = pattern2python(text)
         log.debug('\n%s', py)
-        if is_use_cache:
-            with open(filename_cache, 'w') as f:
-                f.write(py)
+        code = compile(py, '<%s>' % filename_pattern, 'exec')
+        with open(filename_bytecode, 'wb') as f:
+            marshal.dump(code, f)
 
-    f = filename_cache if is_use_cache else '<%s>' % filename
-    code = compile(py, f, 'exec')
     ns = {}
     exec code in ns
     return ns[FUNC_NAME]
 
 
-def _pattern2python(text, filename):
+def pattern2python(text):
+    """
+    Переводит код паттерна в язык программирования python
+
+    :param text: код паттерна
+    :return: код на питоне
+    """
+    # удаляем начальные и конечные пробелы в строках
     text = '\n'.join(line.strip() for line in text.split('\n'))
-    s = tokenizer(text)
+    s = tokenize(text)
     result = [
         '# coding: utf-8',
         '\n',
-        '# DO NOT EDIT THIS! Generated from %s' % filename,
+        '# DO NOT EDIT THIS!',
         '\n',
         'def %s(bot):' % FUNC_NAME,
         '\n',
     ]
     tabs = 4
-    is_begin = True
     try:
         while True:
             tokid, tokval = next(s)
-            if tokid == 'COMMENT1':
+            if tokid == TOK_COMMENT1:
                 continue
-            if tokid == 'NEWLINE':
+            if tokid == TOK_NEWLINE:
                 result.append('\n')
-                is_begin = True
+                result.append(' ' * tabs)
                 continue
-            if tokid == 'BEGIN_BLOCK':
+            if tokid == TOK_BEGIN_BLOCK:
                 tabs += 4
                 el = result.pop()
                 if el != ' ':
                     result.append(el)
                 result.append(':')
                 result.append('\n')
-                is_begin = True
+                result.append(' ' * tabs)
                 continue
-            if tokid == 'END_BLOCK':
+            if tokid == TOK_END_BLOCK:
                 tabs -= 4
                 result.append('\n')
-                is_begin = True
+                result.append(' ' * tabs)
                 continue
-            if tokid == 'ID' and tokval == 'function':
-                tokval = 'def'
-
-            if is_begin and tokid != 'SPACE':
-                el = '%s%s' % (' ' * tabs, tokval)
-                is_begin = False
-            else:
-                el = tokval
-            result.append(el)
+            # rename keywords
+            if tokid == TOK_ID:
+                if tokval == 'function':
+                    tokval = 'def'
+            result.append(tokval)
     except StopIteration:
         r = ''.join(result)
-        r2 = [line for line in r.split('\n') if line.strip()]
-        return '\n'.join(r2)
+        # удалить пустые строки
+        r2 = '\n'.join(line for line in r.split('\n') if line.strip())
+        return r2
