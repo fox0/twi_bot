@@ -1,5 +1,6 @@
 # coding: utf-8
 import re
+from collections import namedtuple
 from twi_bot.parse.tokens import *
 
 tokens_list = {
@@ -31,6 +32,8 @@ tokens_list = {
     18: re.compile(r'^>'),
 }
 
+Token = namedtuple('Token', ['tokid', 'tokval'])
+
 
 class ParseError(Exception):
     pass
@@ -41,7 +44,7 @@ def tokenize(text):
     Генератор. Разбивает код паттерна на токены
 
     :param text: код паттерна
-    :return: очередной токен (tokid, tokval)
+    :return: очередной токен
     """
     numline = 1
     numcol = 0
@@ -56,7 +59,7 @@ def tokenize(text):
                     numline += 1  # todo
                 is_found = True
                 index += m.end()
-                yield (tokid, m.group(0))
+                yield Token(tokid, m.group(0))
                 break
         if not is_found:
             raise ParseError('Parse error in line %d:\n%s' % (numline, text.split('\n')[numline - 1]))

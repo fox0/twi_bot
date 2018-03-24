@@ -11,15 +11,16 @@ log = logging.getLogger(__name__)
 FUNC_NAME = '__pattern'
 
 
-def load_pattern(filename_pattern):
+def load_pattern(filename_pattern, use_cache=True):
     """
     Загрузить паттерн из файла
 
     :param filename_pattern: имя файла-паттерна
+    :param use_cache: флаг использования кеша байт-кода
     :return: скомпилированная функция паттерна
     """
     filename_bytecode = '%s_%s.pyc' % (os.path.abspath(filename_pattern), os.path.getmtime(filename_pattern))
-    if os.path.exists(filename_bytecode):
+    if use_cache and os.path.exists(filename_bytecode):
         log.debug('load bytecodes from %s', filename_bytecode)
         with open(filename_bytecode, 'rb') as f:
             code = marshal.load(f)
@@ -30,8 +31,9 @@ def load_pattern(filename_pattern):
         py = pattern2python(text)
         log.debug('\n%s', py)
         code = compile(py, '<%s>' % filename_pattern, 'exec')
-        with open(filename_bytecode, 'wb') as f:
-            marshal.dump(code, f)
+        if use_cache:
+            with open(filename_bytecode, 'wb') as f:
+                marshal.dump(code, f)
 
     ns = {}
     exec code in ns
@@ -68,10 +70,12 @@ def pattern2python(text):
                 continue
             if tokid == TOK_BEGIN_BLOCK:
                 tabs += 4
-                el = result.pop()
-                if el != ' ':
-                    result.append(el)
+                if result[-1] == ' ':
+                    result.pop()
                 result.append(':')
+                result.append('\n')
+                result.append(' ' * tabs)
+                result.append('pass')
                 result.append('\n')
                 result.append(' ' * tabs)
                 continue
@@ -80,10 +84,17 @@ def pattern2python(text):
                 result.append('\n')
                 result.append(' ' * tabs)
                 continue
-            # rename keywords
+            if tokid == TOK_SPACE:
+                if result[-1][-1] != ' ':
+                    result.append(' ')
+                continue
             if tokid == TOK_ID:
-                if tokval == 'function':
-                    tokval = 'def'
+                val = {
+                    'function': 'def',
+                    'elseif': 'elif',
+                }.get(tokval, tokval)
+                result.append(val)
+                continue
             result.append(tokval)
     except StopIteration:
         r = ''.join(result)
