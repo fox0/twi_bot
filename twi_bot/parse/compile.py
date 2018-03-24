@@ -8,7 +8,6 @@ from twi_bot.parse.tokenize import tokenize
 from twi_bot.parse.tokens import *
 
 log = logging.getLogger(__name__)
-FUNC_NAME = '__pattern'
 
 
 def load_pattern(filename_pattern, use_cache=True):
@@ -19,6 +18,7 @@ def load_pattern(filename_pattern, use_cache=True):
     :param use_cache: флаг использования кеша байт-кода
     :return: скомпилированная функция паттерна
     """
+    func_name = _get_func_name(filename_pattern)
     filename_bytecode = '%s_%s.pyc' % (os.path.abspath(filename_pattern), os.path.getmtime(filename_pattern))
     if use_cache and os.path.exists(filename_bytecode):
         log.debug('load bytecodes from %s', filename_bytecode)
@@ -28,7 +28,7 @@ def load_pattern(filename_pattern, use_cache=True):
         log.debug('load pattern from %s', filename_pattern)
         with open(filename_pattern) as f:
             text = f.read()
-        py = pattern2python(text)
+        py = pattern2python(text, func_name)
         log.debug('\n%s', py)
         code = compile(py, '<%s>' % filename_pattern, 'exec')
         if use_cache:
@@ -37,10 +37,14 @@ def load_pattern(filename_pattern, use_cache=True):
 
     ns = {}
     exec code in ns
-    return ns[FUNC_NAME]
+    return ns[func_name]
 
 
-def pattern2python(text):
+def _get_func_name(filename_pattern):
+    return 'pattern_' + os.path.basename(filename_pattern).rsplit('.', 1)[0].replace('.', '_')
+
+
+def pattern2python(text, func_name):
     """
     Переводит код паттерна в язык программирования python
 
@@ -55,7 +59,9 @@ def pattern2python(text):
         '\n',
         '# DO NOT EDIT THIS!',
         '\n',
-        'def %s(bot):' % FUNC_NAME,
+        '__builtins__ = {}'
+        '\n',
+        'def %s(bot):' % func_name,
         '\n',
     ]
     tabs = 4
