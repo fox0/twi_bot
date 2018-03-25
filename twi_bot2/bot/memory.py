@@ -9,4 +9,5 @@ class Node(object):
     def __init__(self):
         self.karma = 0
         self.scope = None
+        # указатели на другие узлы графа
         self.l, self.r, self.u, self.d = None, None, None, None
