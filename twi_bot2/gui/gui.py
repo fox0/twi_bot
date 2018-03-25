@@ -22,8 +22,15 @@ class GUI(object):
         self.all_sprites.add(self.goal)
 
         self.walls = pygame.sprite.Group()
-        self.walls.add(Wall(80, 150))
-        # todo add...
+        walls = (
+            (180, 130),
+            (180, 140),
+            (180, 150),
+            (180, 160),
+            (180, 170),
+        )
+        for x, y in walls:
+            self.walls.add(Wall(x, y))
 
         self.all_sprites.add(self.walls)
 

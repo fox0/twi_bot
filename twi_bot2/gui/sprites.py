@@ -23,4 +23,4 @@ class Bot(pygame.sprite.Sprite):
         super(Bot, self).__init__()
         self.surf = pygame.Surface((10, 10))
         self.surf.fill((0, 0, 0))
-        self.rect = pygame.Rect((x, y, 10, 10))  # todo 15, 15?
+        self.rect = pygame.Rect((x, y, 10, 10))

@@ -3,6 +3,8 @@
 import logging
 import traceback
 
+# import networkx as nx
+
 from twi_bot2.bot.pattern.load import load_patterns
 from twi_bot2.bot.pattern.interface import PatternInterfaceBot, RunTimePatternError
 from twi_bot2.gui.gui import GUI
@@ -20,13 +22,22 @@ def main():
     patterns = load_patterns()
     while True:
         sensors = {
-            'wall_l': 10,  # todo
+            'wall_l': 10,
             'wall_r': 10,
             'wall_u': 10,
             'wall_d': 10,
             'coord_x': gui.bot.rect.x,
             'coord_y': gui.bot.rect.y,
         }
+        for wall in gui.walls:
+            if wall.rect.collidepoint(gui.bot.rect.x + step, gui.bot.rect.y):
+                sensors['wall_r'] = 0
+            if wall.rect.collidepoint(gui.bot.rect.x - step, gui.bot.rect.y):
+                sensors['wall_l'] = 0
+            if wall.rect.collidepoint(gui.bot.rect.x, gui.bot.rect.y + step):
+                sensors['wall_d'] = 0
+            if wall.rect.collidepoint(gui.bot.rect.x, gui.bot.rect.y - step):
+                sensors['wall_u'] = 0
 
         task_params = {
             'coord_x': gui.goal.rect.x,
