@@ -50,6 +50,13 @@ expression
 	| '(' expression ')'
 	| expression expression_operator expression
 	| call_function
+	| 'bot' '.' interface_bot
+
+interface_bot
+	: 'math' '.' call_function
+	| 'sensors' '.' IDENTIFIER
+	| 'task' '.' IDENTIFIER
+	| 'act' '.' IDENTIFIER '(' expression ')'
 
 assignment_operator
 	: '='
