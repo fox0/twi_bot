@@ -1,9 +1,8 @@
 # coding: utf-8
 import os
 import logging
-from twi_bot.parse.compile import load_pattern
-from twi_bot.parse.tokenize import ParseError
-# todo смерджить этот код с первой версией!!!
+from twi_bot2.bot.pattern.compile import load_pattern
+from twi_bot2.bot.pattern.tokenize import ParseError
 
 log = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 # coding: utf-8
 import re
 from collections import namedtuple
-from twi_bot.parse.tokens import *
+from twi_bot2.bot.pattern.tokens import *
 
 tokens_list = {
     TOK_ID: re.compile(r'^[_\w][_\w\d]*'),

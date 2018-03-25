@@ -48,12 +48,12 @@ class PatternInterfaceTaskParam(object):
 
 
 class PatternInterfaceAct(object):
-    def __init__(self, acts):
-        self._list = acts
+    def __init__(self, avalable):
+        self._avalable = avalable
         self._selected = []
 
     def __getattr__(self, item):
-        if item not in self._list:
+        if item not in self._avalable:
             raise RunTimePatternError('Действия "bot.act.%s" не существует' % item)
 
         def func(weight):

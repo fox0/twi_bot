@@ -4,8 +4,8 @@ import os
 import marshal
 import logging
 
-from twi_bot.parse.tokenize import tokenize
-from twi_bot.parse.tokens import *
+from twi_bot2.bot.pattern.tokenize import tokenize
+from twi_bot2.bot.pattern.tokens import *
 
 log = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ def pattern2python(text, func_name):
     :return: код на питоне
     """
     # удаляем начальные и конечные пробелы в строках
-    text = '\n'.join(line.strip() for line in text.split('\n'))
+    # text = '\n'.join(line.strip() for line in text.split('\n'))
     s = tokenize(text)
     result = [
         '# coding: utf-8',
