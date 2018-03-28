@@ -25,8 +25,6 @@ class GUI(object):
         self.screen.blit(self.background, (0, 0))
 
         self.all_sprites = pygame.sprite.Group()
-        self.bot = Bot(xy_bot[0], xy_bot[1], step)
-        self.all_sprites.add(self.bot)
 
         self.goal = Goal(xy_goal[0], xy_goal[1], step)
         self.all_sprites.add(self.goal)
@@ -34,16 +32,20 @@ class GUI(object):
         self.walls = pygame.sprite.Group()
         for x, y in walls:
             self.walls.add(Wall(x, y, step))
-
         self.all_sprites.add(self.walls)
+
+        self.bot = Bot(xy_bot[0], xy_bot[1], step)
+        self.all_sprites.add(self.bot)
 
         self.timer = pygame.time.Clock()
         self.step = step
 
-    def update(self):
-        self.timer.tick(10)
+    def update(self, tick=10, is_show_background=False):
+        self.timer.tick(tick)
         self._exit()
-        # self.screen.blit(self.background, (0, 0))
+
+        if is_show_background:
+            self.screen.blit(self.background, (0, 0))
 
         # сеточка
         color = 80, 80, 80
@@ -64,3 +66,24 @@ class GUI(object):
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_ESCAPE:
                     sys.exit()
+
+    def get_sensors(self):
+        step = self.step + 6
+        sensors = {
+            'wall_l': 10,
+            'wall_r': 10,
+            'wall_u': 10,
+            'wall_d': 10,
+            'coord_x': self.bot.rect.x,
+            'coord_y': self.bot.rect.y,
+        }
+        for wall in self.walls:
+            if wall.rect.collidepoint(self.bot.rect.x + step, self.bot.rect.y):
+                sensors['wall_r'] = 0
+            if wall.rect.collidepoint(self.bot.rect.x - step, self.bot.rect.y):
+                sensors['wall_l'] = 0
+            if wall.rect.collidepoint(self.bot.rect.x, self.bot.rect.y + step):
+                sensors['wall_d'] = 0
+            if wall.rect.collidepoint(self.bot.rect.x, self.bot.rect.y - step):
+                sensors['wall_u'] = 0
+        return sensors
