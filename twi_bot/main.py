@@ -1,15 +1,14 @@
 #!/usr/bin/env python2
 # coding: utf-8
 import logging
-import traceback
 
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from twi_bot2.bot.pattern.load import load_patterns
-from twi_bot2.bot.pattern.interface import PatternInterfaceBot, RunTimePatternError
-from twi_bot2.bot.memory import Node
-from twi_bot2.gui.gui import GUI
+from twi_bot.bot.pattern.load import load_patterns
+from twi_bot.bot.pattern.interface import PatternInterfaceBot, RunTimePatternError
+from twi_bot.bot.memory import Node
+from twi_bot.gui.gui import GUI
 
 log = logging.getLogger(__name__)
 
@@ -96,8 +95,8 @@ def get_command(bot, patterns):
             pattern(bot)
         except RunTimePatternError as e:
             log.error(e)
-        except BaseException:
-            log.critical(traceback.format_exc())
+        except BaseException as e:
+            log.exception(e)
     # noinspection PyProtectedMember
     return make_desision1(bot.act._selected)
 

@@ -3,6 +3,11 @@
 # todo local and global
 
 
+class Memory(object):
+    # todo dict
+    pass
+
+
 class Node(object):
     """Узел графа"""
 

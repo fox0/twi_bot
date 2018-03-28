@@ -1,7 +1,7 @@
 # coding: utf-8
 import sys
 import pygame
-from twi_bot2.gui.sprites import Bot, Wall, Goal
+from twi_bot.gui.sprites import Bot, Wall, Goal
 
 
 class GUI(object):
