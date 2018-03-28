@@ -2,25 +2,23 @@
 import pygame
 
 
-class Wall(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super(Wall, self).__init__()
-        self.surf = pygame.Surface((10, 10))
-        self.surf.fill((255, 0, 0))
-        self.rect = pygame.Rect((x, y, 10, 10))
+class AbstractSprite(pygame.sprite.Sprite):
+    color = 0, 0, 0
+
+    def __init__(self, x, y, size=10):
+        super(AbstractSprite, self).__init__()
+        self.surf = pygame.Surface((size, size))
+        self.surf.fill(self.color)
+        self.rect = pygame.Rect((x, y, size, size))
 
 
-class Goal(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super(Goal, self).__init__()
-        self.surf = pygame.Surface((10, 10))
-        self.surf.fill((0, 255, 0))
-        self.rect = pygame.Rect((x, y, 10, 10))
+class Bot(AbstractSprite):
+    pass
 
 
-class Bot(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super(Bot, self).__init__()
-        self.surf = pygame.Surface((10, 10))
-        self.surf.fill((0, 0, 0))
-        self.rect = pygame.Rect((x, y, 10, 10))
+class Wall(AbstractSprite):
+    color = 255, 0, 0
+
+
+class Goal(AbstractSprite):
+    color = 0, 255, 0

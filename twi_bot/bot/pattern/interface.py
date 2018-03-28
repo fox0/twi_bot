@@ -27,6 +27,7 @@ class PatternInterfaceMath(object):
 
 class PatternInterfaceSensors(object):
     def __init__(self, avalable):
+        assert isinstance(avalable, dict)
         self._dict = avalable
 
     def __getattr__(self, item):
@@ -38,6 +39,7 @@ class PatternInterfaceSensors(object):
 
 class PatternInterfaceTaskParam(object):
     def __init__(self, task_params):
+        assert isinstance(task_params, dict)
         self._dict = task_params
 
     def __getattr__(self, item):
@@ -49,6 +51,7 @@ class PatternInterfaceTaskParam(object):
 
 class PatternInterfaceAct(object):
     def __init__(self, avalable):
+        assert isinstance(avalable, (list, tuple))
         self._avalable = avalable
         self._selected = []
 

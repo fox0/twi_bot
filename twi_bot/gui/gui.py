@@ -5,41 +5,53 @@ from twi_bot.gui.sprites import Bot, Wall, Goal
 
 
 class GUI(object):
-    def __init__(self):
-        pygame.init()
-        pygame.display.set_caption('twi_bot 0.2 by fox')
+    SIZE = 600, 600
 
-        self.screen = pygame.display.set_mode((300, 300))
-        self.background = pygame.Surface((300, 300))
+    def __init__(self, step, xy_bot, xy_goal, walls):
+        """
+
+        :param step: шаг сетки
+        :param xy_bot:
+        :param xy_goal:
+        :param walls:
+        :return:
+        """
+        pygame.init()
+        pygame.display.set_caption('twi_bot 0.2.1 by fox')
+
+        self.screen = pygame.display.set_mode(self.SIZE)
+        self.background = pygame.Surface(self.SIZE)
         self.background.fill((255, 255, 255))
         self.screen.blit(self.background, (0, 0))
 
         self.all_sprites = pygame.sprite.Group()
-        self.bot = Bot(10, 150)
+        self.bot = Bot(xy_bot[0], xy_bot[1], step)
         self.all_sprites.add(self.bot)
 
-        self.goal = Goal(280, 150)
+        self.goal = Goal(xy_goal[0], xy_goal[1], step)
         self.all_sprites.add(self.goal)
 
         self.walls = pygame.sprite.Group()
-        walls = (
-            (180, 130),
-            (180, 140),
-            (180, 150),
-            (180, 160),
-            (180, 170),
-        )
         for x, y in walls:
-            self.walls.add(Wall(x, y))
+            self.walls.add(Wall(x, y, step))
 
         self.all_sprites.add(self.walls)
 
         self.timer = pygame.time.Clock()
+        self.step = step
 
     def update(self):
         self.timer.tick(10)
         self._exit()
         # self.screen.blit(self.background, (0, 0))
+
+        # сеточка
+        color = 80, 80, 80
+        for x in range(0, self.SIZE[0], self.step):
+            pygame.draw.line(self.screen, color, (x, 0), (x, self.SIZE[1]))
+        for y in range(0, self.SIZE[1], self.step):
+            pygame.draw.line(self.screen, color, (0, y), (self.SIZE[1], y))
+
         for i in self.all_sprites:
             self.screen.blit(i.surf, i.rect)
         pygame.display.flip()
