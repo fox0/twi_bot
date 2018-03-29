@@ -34,7 +34,7 @@ def main():
 
     # todo выбор задачи
     patterns = load_patterns()
-    for _ in range(300):
+    for _ in range(100):
         bot = PatternInterfaceBot(gui.get_sensors(), avalable_acts, {
             'coord_x': gui.goal.rect.centerx,
             'coord_y': gui.goal.rect.centery,

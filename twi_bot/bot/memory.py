@@ -1,6 +1,7 @@
 # coding: utf-8
-import matplotlib.pyplot as plt
-import networkx as nx
+import logging
+
+log = logging.getLogger(__name__)
 
 
 # todo local and global
@@ -60,15 +61,22 @@ class Memory(object):
 
     def show_graph(self):
         """"Визуализировать граф"""
+        import matplotlib.pyplot as plt
+        import networkx as nx
+
         graph = nx.Graph()
+        colors = []
 
         for node in self.__d.values():
-            graph.add_node(node)
+            graph.add_node(node)  # todo неправильно красится нода
+            colors.append('1' if node.scope else '0')
+            log.debug('node %s scope=%s', node, node.scope)
             for node2 in node.edges:
                 graph.add_edge(node, node2)
 
+        assert len(graph.nodes) == len(colors)
         pos = nx.spring_layout(graph)
-        nx.draw(graph, pos, font_size=16, with_labels=False)
+        nx.draw(graph, pos, node_color=colors, font_size=16, with_labels=False)
         for p in pos:
             pos[p][1] -= 0.06
         nx.draw_networkx_labels(graph, pos)
