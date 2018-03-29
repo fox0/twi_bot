@@ -1,11 +1,14 @@
 #!/usr/bin/env python2
 # coding: utf-8
-import logging
+import logging.config
+
+import numpy as np
 
 from twi_bot.bot.pattern.load import load_patterns
 from twi_bot.bot.pattern.interface import PatternInterfaceBot, RunTimePatternError
 from twi_bot.bot.memory import Memory
 from twi_bot.gui.gui import GUI
+from twi_bot.bot.make_decision import make_desision1
 
 log = logging.getLogger(__name__)
 
@@ -30,53 +33,70 @@ def main():
 
     memory = Memory(step)
 
-    step = 1  # todo
-
     # todo выбор задачи
     patterns = load_patterns()
-    for _ in range(100):
+
+    prev_command = ''
+
+    for _ in range(200):
         bot = PatternInterfaceBot(gui.get_sensors(), avalable_acts, {
             'coord_x': gui.goal.rect.centerx,
             'coord_y': gui.goal.rect.centery,
         })
 
-        prev_node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y)
-        prev_node.scope = 1  # todo пока так
-
-        # todo принимать решения на основе памяти!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        current_node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y)
+        current_node.scope = 1
 
         acts3 = get_command(bot, patterns)
+
+        # смотрим доступные места и запоминаем их
         for command, _ in acts3:
-            if command == 'go_right':
-                node = memory.get_node(gui.bot.rect.x + gui.step, gui.bot.rect.y)
-            elif command == 'go_left':
-                node = memory.get_node(gui.bot.rect.x - gui.step, gui.bot.rect.y)
-            elif command == 'go_down':
-                node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y + gui.step)
-            elif command == 'go_up':
-                node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y - gui.step)
-            else:
-                raise NotImplementedError
+            node = get_node(gui, memory, command)
+            current_node.add_link(node)
 
-            node.add_link(prev_node)
+        # todo если мы движемся в сторону ноды, в которой не были, то до неё нужно дойти!!!
 
-        command = acts3[0][0]
-        log.info('Принято решение выполнить действие "%s"', command)
-
-        # todo внести в класс gui?
-        if command == 'go_right':
-            gui.bot.rect.x += step
-        elif command == 'go_left':
-            gui.bot.rect.x -= step
-        elif command == 'go_down':
-            gui.bot.rect.y += step
-        elif command == 'go_up':
-            gui.bot.rect.y -= step
+        is_found = False
+        command_ = None
+        for command, _ in acts3:
+            node = get_node(gui, memory, command)
+            if not node.scope:  # если не были в этой ноде
+                command_ = command
+                is_found = True
+                break
+        if is_found:
+            log.info('Принято решение выполнить действие "%s"', command_)
+            up(gui, command_)
         else:
-            raise NotImplementedError
-        gui.update(tick=60, is_show_background=False)
+            log.warning('oops')
+            # что ж, мы зашли в тупик. Ой.
+            for node in current_node.edges:
+                a = 0
+            pass
 
     memory.show_graph()
+
+
+def up(gui, command):
+    gui.execute_command(command)
+    gui.update(tick=60,
+               is_show_background=True
+               )
+
+
+# todo
+def get_node(gui, memory, command):
+    if command == 'go_right':
+        node = memory.get_node(gui.bot.rect.x + gui.step, gui.bot.rect.y)
+    elif command == 'go_left':
+        node = memory.get_node(gui.bot.rect.x - gui.step, gui.bot.rect.y)
+    elif command == 'go_down':
+        node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y + gui.step)
+    elif command == 'go_up':
+        node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y - gui.step)
+    else:
+        raise NotImplementedError
+    return node
 
 
 def get_command(bot, patterns):
@@ -91,22 +111,9 @@ def get_command(bot, patterns):
     return make_desision1(bot.act._selected)
 
 
-def make_desision1(acts):
-    log.debug('acts=%s', acts)
-    d = {}
-    for act, weight in acts:
-        d[act] = d.get(act, 0) + weight
-    acts2 = [(act, weight) for act, weight in d.items()]
-    acts2.sort(key=lambda x: -x[1])
-    log.info(acts2)
-
-    acts3 = filter(lambda x: x[1] > 0, acts2)
-    log.info(acts3)
-    return acts3
-
-
 if __name__ == '__main__':
     logging.basicConfig(
         level=logging.DEBUG
     )
+    # logging.config.fileConfig('config/logging.conf')
     main()

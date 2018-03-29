@@ -26,7 +26,9 @@ class Memory(object):
         k = self.round(x) / self.step, self.round(y) / self.step
         if k not in self.__d:
             self.__d[k] = Node(k[0], k[1])
-        return self.__d[k]
+        result = self.__d[k]
+        assert isinstance(result, Node)
+        return result
 
     def round(self, v):
         """
@@ -75,7 +77,7 @@ class Memory(object):
         node_color = ['0' if node.scope else '1' for node in graph.nodes()]
         nx.draw(graph, pos, node_color=node_color)
         for p in pos:
-            pos[p][1] -= 0.06
+            pos[p][1] -= .1
         nx.draw_networkx_labels(graph, pos)
         plt.show()
 

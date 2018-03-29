@@ -87,3 +87,16 @@ class GUI(object):
             if wall.rect.collidepoint(self.bot.rect.x, self.bot.rect.y - step):
                 sensors['wall_u'] = 0
         return sensors
+
+    def execute_command(self, command):
+        step = 1
+        if command == 'go_right':
+            self.bot.rect.x += step
+        elif command == 'go_left':
+            self.bot.rect.x -= step
+        elif command == 'go_down':
+            self.bot.rect.y += step
+        elif command == 'go_up':
+            self.bot.rect.y -= step
+        else:
+            raise NotImplementedError
