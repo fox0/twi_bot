@@ -65,18 +65,15 @@ class Memory(object):
         import networkx as nx
 
         graph = nx.Graph()
-        colors = []
-
         for node in self.__d.values():
-            graph.add_node(node)  # todo неправильно красится нода
-            colors.append('1' if node.scope else '0')
             log.debug('node %s scope=%s', node, node.scope)
+            graph.add_node(node)
             for node2 in node.edges:
                 graph.add_edge(node, node2)
 
-        assert len(graph.nodes) == len(colors)
         pos = nx.spring_layout(graph)
-        nx.draw(graph, pos, node_color=colors, font_size=16, with_labels=False)
+        node_color = ['0' if node.scope else '1' for node in graph.nodes()]
+        nx.draw(graph, pos, node_color=node_color)
         for p in pos:
             pos[p][1] -= 0.06
         nx.draw_networkx_labels(graph, pos)
