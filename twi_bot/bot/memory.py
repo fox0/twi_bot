@@ -65,4 +65,5 @@ class Node(object):
         self.scope = None  # todo список с timestamp
 
     def __str__(self):
-        return '(%d;%d)' % (self.x, self.y)
+        step = 20  # todo
+        return '(%d;%d)' % (self.x / step, self.y / step)

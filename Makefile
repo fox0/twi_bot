@@ -1,7 +1,9 @@
-.PHONY: clean all
+.PHONY: install clean
 
-all:
-	yacc doc/pattern.grammar.y
+install:
+	virtualenv --system-site-packages --python=python2 env
+	# . env/bin/activate;\
+	# pip install -r requirements.txt
 
 clean:
 	find . -name '*.pyc' -exec rm --force {} +

@@ -34,7 +34,7 @@ class GUI(object):
             self.walls.add(Wall(x, y, step))
         self.all_sprites.add(self.walls)
 
-        self.bot = Bot(xy_bot[0], xy_bot[1], step)
+        self.bot = Bot(xy_bot[0], xy_bot[1], step / 2)
         self.all_sprites.add(self.bot)
 
         self.timer = pygame.time.Clock()
@@ -68,14 +68,14 @@ class GUI(object):
                     sys.exit()
 
     def get_sensors(self):
-        step = self.step + 6
+        step = self.step - 7
         sensors = {
             'wall_l': 10,
             'wall_r': 10,
             'wall_u': 10,
             'wall_d': 10,
-            'coord_x': self.bot.rect.x,
-            'coord_y': self.bot.rect.y,
+            'coord_x': self.bot.rect.centerx,
+            'coord_y': self.bot.rect.centery,
         }
         for wall in self.walls:
             if wall.rect.collidepoint(self.bot.rect.x + step, self.bot.rect.y):

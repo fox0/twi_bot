@@ -19,12 +19,18 @@ def main():
     graph = nx.Graph()
 
     step = 20
-    gui = GUI(step=step, xy_bot=(20, 160), xy_goal=(280, 160), walls=(
+    gui = GUI(step=step, xy_bot=(110, 205), xy_goal=(280, 160), walls=(
+        (80, 120),
+        (100, 120),
+        (120, 120),
+        (140, 120),
+        (160, 120),
         (180, 120),
         (180, 140),
         (180, 160),
         (180, 180),
         (180, 200),
+        (180, 220),
     ))
 
     memory = Memory(step)
@@ -35,8 +41,8 @@ def main():
     patterns = load_patterns()
     for _ in range(300):
         bot = PatternInterfaceBot(gui.get_sensors(), avalable_acts, {
-            'coord_x': gui.goal.rect.x,
-            'coord_y': gui.goal.rect.y,
+            'coord_x': gui.goal.rect.centerx,
+            'coord_y': gui.goal.rect.centery,
         })
 
         prev_node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y)
@@ -73,9 +79,17 @@ def main():
             gui.bot.rect.y -= step
         else:
             raise NotImplementedError
-        gui.update(tick=30, is_show_background=True)
+        gui.update(tick=60, is_show_background=False)
 
-    nx.draw_networkx(graph)
+    show_graph(graph)
+
+
+def show_graph(graph):
+    pos = nx.spring_layout(graph)
+    nx.draw(graph, pos, font_size=16, with_labels=False)
+    for p in pos:
+        pos[p][1] -= 0.06
+    nx.draw_networkx_labels(graph, pos)
     plt.show()
 
 
