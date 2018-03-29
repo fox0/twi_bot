@@ -1,4 +1,7 @@
 # coding: utf-8
+import matplotlib.pyplot as plt
+import networkx as nx
+
 
 # todo local and global
 
@@ -19,14 +22,15 @@ class Memory(object):
         :param x, y: координаты, для которых запрашивается информация
         :return: объект Node
         """
-        k = self.round(x), self.round(y)
+        k = self.round(x) / self.step, self.round(y) / self.step
         if k not in self.__d:
-            self.__d[k] = Node(k)
+            self.__d[k] = Node(k[0], k[1])
         return self.__d[k]
 
     def round(self, v):
         """
         Из-за низкой детализации округляем координаты
+
         >>> m = Memory(20)
         >>> m.round(9)
         0
@@ -54,16 +58,42 @@ class Memory(object):
                 return v1
         raise ValueError
 
+    def show_graph(self):
+        """"Визуализировать граф"""
+        graph = nx.Graph()
+
+        for node in self.__d.values():
+            graph.add_node(node)
+            for node2 in node.edges:
+                graph.add_edge(node, node2)
+
+        pos = nx.spring_layout(graph)
+        nx.draw(graph, pos, font_size=16, with_labels=False)
+        for p in pos:
+            pos[p][1] -= 0.06
+        nx.draw_networkx_labels(graph, pos)
+        plt.show()
+
 
 class Node(object):
     """Узел графа"""
 
-    def __init__(self, xy):
-        self.x, self.y = xy
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+        # указатели на соседей
+        self.edges = set()
 
         self.karma = 0
         self.scope = None  # todo список с timestamp
 
+    def add_link(self, node):
+        """Добавить к ноде соседа"""
+        assert isinstance(node, Node)
+        if node == self:
+            return
+        self.edges.add(node)
+        node.edges.add(self)
+
     def __str__(self):
-        step = 20  # todo
-        return '(%d;%d)' % (self.x / step, self.y / step)
+        return '(%d;%d)' % (self.x, self.y)

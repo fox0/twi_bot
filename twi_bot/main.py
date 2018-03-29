@@ -2,9 +2,6 @@
 # coding: utf-8
 import logging
 
-import matplotlib.pyplot as plt
-import networkx as nx
-
 from twi_bot.bot.pattern.load import load_patterns
 from twi_bot.bot.pattern.interface import PatternInterfaceBot, RunTimePatternError
 from twi_bot.bot.memory import Memory
@@ -16,8 +13,6 @@ avalable_acts = 'go_left', 'go_right', 'go_down', 'go_up'
 
 
 def main():
-    graph = nx.Graph()
-
     step = 20
     gui = GUI(step=step, xy_bot=(110, 205), xy_goal=(280, 160), walls=(
         (80, 120),
@@ -46,6 +41,7 @@ def main():
         })
 
         prev_node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y)
+        prev_node.scope = 1  # todo пока так
 
         # todo принимать решения на основе памяти!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -62,8 +58,7 @@ def main():
             else:
                 raise NotImplementedError
 
-            if prev_node != node:
-                graph.add_edge(prev_node, node)
+            node.add_link(prev_node)
 
         command = acts3[0][0]
         log.info('Принято решение выполнить действие "%s"', command)
@@ -81,16 +76,7 @@ def main():
             raise NotImplementedError
         gui.update(tick=60, is_show_background=False)
 
-    show_graph(graph)
-
-
-def show_graph(graph):
-    pos = nx.spring_layout(graph)
-    nx.draw(graph, pos, font_size=16, with_labels=False)
-    for p in pos:
-        pos[p][1] -= 0.06
-    nx.draw_networkx_labels(graph, pos)
-    plt.show()
+    memory.show_graph()
 
 
 def get_command(bot, patterns):
