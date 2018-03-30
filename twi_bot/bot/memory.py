@@ -68,17 +68,23 @@ class Memory(object):
         """"Визуализировать граф"""
         graph = nx.Graph()
         for node in self.__d.values():
-            log.debug('node %s scope=%s', node, node.scope)
+            # log.debug('node %s scope=%s', node, node.scope)
             graph.add_node(node)
             for node2 in node.edges:
                 graph.add_edge(node, node2)
 
-        pos = nx.spring_layout(graph)
-        node_color = ['0' if node.scope else '1' for node in graph.nodes()]
-        nx.draw(graph, pos, node_color=node_color)
-        for p in pos:
-            pos[p][1] -= .1
-        nx.draw_networkx_labels(graph, pos)
+        pos = {}
+        for node in graph.nodes():
+            pos[node] = node.x, -node.y
+
+        node_color = [node.scope for node in graph.nodes()]
+        max_scope = max(i for i in node_color if i)
+        node_color = [i / max_scope if i else 1 for i in node_color]
+        node_color = [(i, i, i) for i in node_color]
+
+        # node_shape = ''.join('o' if node.scope else 's' for node in graph.nodes())  # todo
+
+        nx.draw_networkx(graph, pos=pos, node_color=node_color, with_labels=False)
         plt.show()
 
 

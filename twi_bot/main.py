@@ -16,7 +16,7 @@ avalable_acts = 'go_left', 'go_right', 'go_down', 'go_up'
 def main():
     step = 20
     gui = GUI(
-        step=step, xy_bot=(110, 212), xy_goal=(280, 160), walls=(
+        step=step, xy_bot=(91, 212), xy_goal=(280, 160), walls=(
             (80, 120),
             (100, 120),
             (120, 120),
@@ -43,15 +43,16 @@ def main():
     prev_node = None
 
     for _ in range(750):
-        current_node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y)
-        current_node.scope = 1  # todo
-
         bot = PatternInterfaceBot(gui.get_sensors(), avalable_acts, {
             'coord_x': gui.goal.rect.centerx,
             'coord_y': gui.goal.rect.centery,
         })
         intents = execute_patterns(bot, patterns)
         acts = [i.act for i in intents]
+
+        current_node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y)
+        current_node.scope = bot.math.sqrt((bot.task.coord_x - gui.bot.rect.x) ** 2 +
+                                           (bot.task.coord_y - gui.bot.rect.y) ** 2)  # todo
 
         if prev_node == current_node and prev_command in acts:
             # мы уже приняли решение и продолжаем его выполнять
@@ -60,7 +61,7 @@ def main():
 
         # смотрим доступные места и запоминаем их
         for command in acts:
-            node = get_node(gui, memory, command)
+            node = get_node(gui, memory, command)  # todo добавляет лишние 2-3!
             current_node.add_link(node)
 
         command = get_command(gui, memory, acts)
@@ -77,8 +78,7 @@ def main():
             a = 0
         pass
 
-    for _ in range(10):
-        memory.show_graph()
+    memory.show_graph()
 
 
 def get_command(gui, memory, acts):
