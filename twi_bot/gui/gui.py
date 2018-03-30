@@ -7,15 +7,14 @@ from twi_bot.gui.sprites import Bot, Wall, Goal
 class GUI(object):
     SIZE = 600, 600
 
-    def __init__(self, step, xy_bot, xy_goal, walls):
+    def __init__(self, tick, is_show_background, step, xy_bot, xy_goal, walls):
         """
 
         :param step: шаг сетки
-        :param xy_bot:
-        :param xy_goal:
-        :param walls:
-        :return:
         """
+        self.tick = tick
+        self.is_show_background = is_show_background
+
         pygame.init()
         pygame.display.set_caption('twi_bot 0.2.1 by fox')
 
@@ -40,11 +39,13 @@ class GUI(object):
         self.timer = pygame.time.Clock()
         self.step = step
 
-    def update(self, tick=10, is_show_background=False):
-        self.timer.tick(tick)
-        self._exit()
+    def update(self, command):
+        self.timer.tick(self.tick)
 
-        if is_show_background:
+        self._execute_command(command)
+        _pygame_exit()
+
+        if self.is_show_background:
             self.screen.blit(self.background, (0, 0))
 
         # сеточка
@@ -57,15 +58,6 @@ class GUI(object):
         for i in self.all_sprites:
             self.screen.blit(i.surf, i.rect)
         pygame.display.flip()
-
-    @staticmethod
-    def _exit():
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                sys.exit()
-            if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_ESCAPE:
-                    sys.exit()
 
     def get_sensors(self):
         step = self.step - 7
@@ -88,7 +80,7 @@ class GUI(object):
                 sensors['wall_u'] = 0
         return sensors
 
-    def execute_command(self, command):
+    def _execute_command(self, command):
         step = 1
         if command == 'go_right':
             self.bot.rect.x += step
@@ -100,3 +92,12 @@ class GUI(object):
             self.bot.rect.y -= step
         else:
             raise NotImplementedError
+
+
+def _pygame_exit():
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            sys.exit()
+        if e.type == pygame.KEYDOWN:
+            if e.key == pygame.K_ESCAPE:
+                sys.exit()

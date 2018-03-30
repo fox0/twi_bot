@@ -1,6 +1,9 @@
 # coding: utf-8
 import logging
 
+import matplotlib.pyplot as plt
+import networkx as nx
+
 log = logging.getLogger(__name__)
 
 
@@ -63,9 +66,6 @@ class Memory(object):
 
     def show_graph(self):
         """"Визуализировать граф"""
-        import matplotlib.pyplot as plt
-        import networkx as nx
-
         graph = nx.Graph()
         for node in self.__d.values():
             log.debug('node %s scope=%s', node, node.scope)
