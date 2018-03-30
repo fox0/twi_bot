@@ -16,9 +16,7 @@ avalable_acts = 'go_left', 'go_right', 'go_down', 'go_up'
 def main():
     step = 20
     gui = GUI(
-        tick=60,
-        is_show_background=True,
-        step=step, xy_bot=(110, 205), xy_goal=(280, 160), walls=(
+        step=step, xy_bot=(110, 212), xy_goal=(280, 160), walls=(
             (80, 120),
             (100, 120),
             (120, 120),
@@ -30,7 +28,10 @@ def main():
             (180, 180),
             (180, 200),
             (180, 220),
-        ))
+        ),
+        tick=60,
+        # is_show_background=True
+    )
 
     patterns = load_patterns()
 
@@ -41,7 +42,7 @@ def main():
     prev_command = ''
     prev_node = None
 
-    for _ in range(200):
+    for _ in range(750):
         current_node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y)
         current_node.scope = 1  # todo
 
@@ -62,32 +63,30 @@ def main():
             node = get_node(gui, memory, command)
             current_node.add_link(node)
 
-        command = acts[0]
-        log.info('%s Принято решение выполнить действие "%s"', current_node, command)
-        gui.update(command)
+        command = get_command(gui, memory, acts)
+        if command:
+            log.info('%s Принято решение выполнить действие "%s"', current_node, command)
+            gui.update(command)
+            prev_node = current_node
+            prev_command = command
+            continue
 
-        prev_node = current_node
-        prev_command = command
+        log.warning('oops')
+        # что ж, мы зашли в тупик. Ой.
+        for node in current_node.edges:
+            a = 0
+        pass
 
-        # is_found = False
-        # command_ = None
-        # for command, _ in acts3:
-        #     node = get_node(gui, memory, command)
-        #     if not node.scope:  # если не были в этой ноде
-        #         command_ = command
-        #         is_found = True
-        #         break
-        # if is_found:
-        #     log.info('Принято решение выполнить действие "%s"', command_)
-        #     gui.update(command_)
-        # else:
-        #     log.warning('oops')
-        #     # что ж, мы зашли в тупик. Ой.
-        #     for node in current_node.edges:
-        #         a = 0
-        #     pass
+    for _ in range(10):
+        memory.show_graph()
 
-    memory.show_graph()
+
+def get_command(gui, memory, acts):
+    for command in acts:
+        node = get_node(gui, memory, command)
+        if not node.scope:  # если не были в этой ноде
+            return command
+    return None
 
 
 # todo

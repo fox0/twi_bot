@@ -5,9 +5,9 @@ from twi_bot.gui.sprites import Bot, Wall, Goal
 
 
 class GUI(object):
-    SIZE = 600, 600
+    SIZE = 350, 350
 
-    def __init__(self, tick, is_show_background, step, xy_bot, xy_goal, walls):
+    def __init__(self, step, xy_bot, xy_goal, walls, tick=60, is_show_background=False):
         """
 
         :param step: шаг сетки
@@ -50,9 +50,9 @@ class GUI(object):
 
         # сеточка
         color = 80, 80, 80
-        for x in range(0, self.SIZE[0], self.step):
+        for x in range(5, self.SIZE[0], self.step):
             pygame.draw.line(self.screen, color, (x, 0), (x, self.SIZE[1]))
-        for y in range(0, self.SIZE[1], self.step):
+        for y in range(5, self.SIZE[1], self.step):
             pygame.draw.line(self.screen, color, (0, y), (self.SIZE[1], y))
 
         for i in self.all_sprites:
@@ -60,7 +60,6 @@ class GUI(object):
         pygame.display.flip()
 
     def get_sensors(self):
-        step = self.step - 7
         sensors = {
             'wall_l': 10,
             'wall_r': 10,
@@ -70,13 +69,13 @@ class GUI(object):
             'coord_y': self.bot.rect.centery,
         }
         for wall in self.walls:
-            if wall.rect.collidepoint(self.bot.rect.x + step, self.bot.rect.y):
+            if wall.rect.collidepoint(self.bot.rect.x + self.step - 7, self.bot.rect.y):
                 sensors['wall_r'] = 0
-            if wall.rect.collidepoint(self.bot.rect.x - step, self.bot.rect.y):
+            if wall.rect.collidepoint(self.bot.rect.x - self.step - 7, self.bot.rect.y):
                 sensors['wall_l'] = 0
-            if wall.rect.collidepoint(self.bot.rect.x, self.bot.rect.y + step):
+            if wall.rect.collidepoint(self.bot.rect.x, self.bot.rect.y + self.step + 7):
                 sensors['wall_d'] = 0
-            if wall.rect.collidepoint(self.bot.rect.x, self.bot.rect.y - step):
+            if wall.rect.collidepoint(self.bot.rect.x, self.bot.rect.y - self.step + 7):
                 sensors['wall_u'] = 0
         return sensors
 
