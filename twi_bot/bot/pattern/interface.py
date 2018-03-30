@@ -5,10 +5,15 @@
 В коде паттерна доступна глобальная переменная bot.
 
 * bot.math - библиотека математических функций
+* bot.sensors - входные данные от датчиков
 * ...
 """
 # todo doc
 import math
+from collections import namedtuple
+
+# Намерение выполнить действие
+Intent = namedtuple('Intent', ['act', 'weight'])
 
 
 class RunTimePatternError(Exception):
@@ -60,7 +65,7 @@ class PatternInterfaceAct(object):
             raise RunTimePatternError('Действия "bot.act.%s" не существует' % item)
 
         def func(weight):
-            self._selected.append((item, weight))
+            self._selected.append(Intent(item, weight))
 
         return func
 

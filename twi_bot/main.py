@@ -1,8 +1,6 @@
 #!/usr/bin/env python2
 # coding: utf-8
-import logging.config
-
-import numpy as np
+import logging
 
 from twi_bot.bot.pattern.load import load_patterns
 from twi_bot.bot.pattern.interface import PatternInterfaceBot
@@ -10,7 +8,7 @@ from twi_bot.bot.memory import Memory
 from twi_bot.gui.gui import GUI
 from twi_bot.bot.make_decision import execute_patterns
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('twi_bot.main')
 
 avalable_acts = 'go_left', 'go_right', 'go_down', 'go_up'
 
@@ -34,48 +32,60 @@ def main():
             (180, 220),
         ))
 
-    memory = Memory(step)
-
-    # todo выбор задачи
     patterns = load_patterns()
 
+    # todo выбор задачи
+
+    memory = Memory(step)
+
     prev_command = ''
+    prev_node = None
 
     for _ in range(200):
+        current_node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y)
+        current_node.scope = 1  # todo
+
         bot = PatternInterfaceBot(gui.get_sensors(), avalable_acts, {
             'coord_x': gui.goal.rect.centerx,
             'coord_y': gui.goal.rect.centery,
         })
+        intents = execute_patterns(bot, patterns)
+        acts = [i.act for i in intents]
 
-        current_node = memory.get_node(gui.bot.rect.x, gui.bot.rect.y)
-        current_node.scope = 1
-
-        acts3 = execute_patterns(bot, patterns)
+        if prev_node == current_node and prev_command in acts:
+            # мы уже приняли решение и продолжаем его выполнять
+            gui.update(prev_command)
+            continue
 
         # смотрим доступные места и запоминаем их
-        for command, _ in acts3:
+        for command in acts:
             node = get_node(gui, memory, command)
             current_node.add_link(node)
 
-        # todo если мы движемся в сторону ноды, в которой не были, то до неё нужно дойти!!!
+        command = acts[0]
+        log.info('%s Принято решение выполнить действие "%s"', current_node, command)
+        gui.update(command)
 
-        is_found = False
-        command_ = None
-        for command, _ in acts3:
-            node = get_node(gui, memory, command)
-            if not node.scope:  # если не были в этой ноде
-                command_ = command
-                is_found = True
-                break
-        if is_found:
-            log.info('Принято решение выполнить действие "%s"', command_)
-            gui.update(command_)
-        else:
-            log.warning('oops')
-            # что ж, мы зашли в тупик. Ой.
-            for node in current_node.edges:
-                a = 0
-            pass
+        prev_node = current_node
+        prev_command = command
+
+        # is_found = False
+        # command_ = None
+        # for command, _ in acts3:
+        #     node = get_node(gui, memory, command)
+        #     if not node.scope:  # если не были в этой ноде
+        #         command_ = command
+        #         is_found = True
+        #         break
+        # if is_found:
+        #     log.info('Принято решение выполнить действие "%s"', command_)
+        #     gui.update(command_)
+        # else:
+        #     log.warning('oops')
+        #     # что ж, мы зашли в тупик. Ой.
+        #     for node in current_node.edges:
+        #         a = 0
+        #     pass
 
     memory.show_graph()
 
