@@ -25,7 +25,7 @@ class GUI(object):
 
         self.all_sprites = pygame.sprite.Group()
 
-        self.goal = Goal(xy_goal[0], xy_goal[1], step)
+        self.goal = Goal(xy_goal[0], xy_goal[1], step / 2)
         self.all_sprites.add(self.goal)
 
         self.walls = pygame.sprite.Group()
@@ -50,9 +50,9 @@ class GUI(object):
 
         # сеточка
         color = 80, 80, 80
-        for x in range(5, self.SIZE[0], self.step):
+        for x in range(-5, self.SIZE[0], self.step):
             pygame.draw.line(self.screen, color, (x, 0), (x, self.SIZE[1]))
-        for y in range(5, self.SIZE[1], self.step):
+        for y in range(-5, self.SIZE[1], self.step):
             pygame.draw.line(self.screen, color, (0, y), (self.SIZE[1], y))
 
         for i in self.all_sprites:

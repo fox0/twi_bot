@@ -77,15 +77,26 @@ class Memory(object):
         for node in graph.nodes():
             pos[node] = node.x, -node.y
 
-        node_color = [node.scope for node in graph.nodes()]
-        max_scope = max(i for i in node_color if i)
-        node_color = [i / max_scope if i else 1 for i in node_color]
-        node_color = [(i, i, i) for i in node_color]
+        shape = {}
+        for node in graph.nodes():
+            k = 's' if node.scope else 'o'
+            shape.setdefault(k, []).append(node)
 
-        # node_shape = ''.join('o' if node.scope else 's' for node in graph.nodes())  # todo
-
-        nx.draw_networkx(graph, pos=pos, node_color=node_color, with_labels=False)
+        for node_shape, nodelist in shape.items():
+            node_color = _get_color_nodes(nodelist)
+            nx.draw_networkx_nodes(graph, pos, node_shape=node_shape, node_color=node_color, nodelist=nodelist)
+        nx.draw_networkx_edges(graph, pos)
         plt.show()
+
+
+def _get_color_nodes(nodes):
+    node_color = [node.scope for node in nodes]
+    ls = [i for i in node_color if i]
+    if not ls:
+        return 1, 1, 1
+    max_scope = max(ls)
+    node_color = [i / max_scope if i else 1 for i in node_color]
+    return [(i, i, i) for i in node_color]
 
 
 class Node(object):

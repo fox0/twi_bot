@@ -42,7 +42,7 @@ def main():
     prev_command = ''
     prev_node = None
 
-    for _ in range(750):
+    for _ in range(780):
         bot = PatternInterfaceBot(gui.get_sensors(), avalable_acts, {
             'coord_x': gui.goal.rect.centerx,
             'coord_y': gui.goal.rect.centery,
