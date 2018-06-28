@@ -2,3 +2,4 @@ pygame
 networkx
 matplotlib
 numpy
+scikit-fuzzy
