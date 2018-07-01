@@ -14,5 +14,4 @@ clean:
 	find . -name '*.so' -exec rm --force {} +
 
 runjupyter:
-	. venv/bin/activate;\
-	jupyter-notebook
+	jupyter-notebook --no-browser
