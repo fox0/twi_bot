@@ -12,3 +12,7 @@ clean:
 	find . -name '*.pyc' -exec rm --force {} +
 	find . -name '*.o' -exec rm --force {} +
 	find . -name '*.so' -exec rm --force {} +
+
+runjupyter:
+	. venv/bin/activate;\
+	jupyter-notebook
