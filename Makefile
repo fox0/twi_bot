@@ -1,9 +1,12 @@
-.PHONY: install clean
+.PHONY: installenv cleanenv clean
 
-install:
-	virtualenv --system-site-packages --python=python2 venv
-	# . env/bin/activate;\
-	# pip install -r requirements.txt
+installenv:
+	virtualenv --never-download --python=python2 venv;\
+	. venv/bin/activate;\
+	pip install -U -r requirements.txt
+
+cleanvenv:
+	rm -rf venv
 
 clean:
 	find . -name '*.pyc' -exec rm --force {} +
