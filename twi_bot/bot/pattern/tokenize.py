@@ -14,21 +14,22 @@ _list_tokens = (
 
     (TOK_CONST_FLOAT, re.compile(r'^[1-9]\d*\.\d+')),
     (TOK_CONST_INT, re.compile(r'^[1-9]\d*')),
+    (TOK_CONST_STR, re.compile(r'^\'.*?\'|".*?"')),
 
-    (8, re.compile(r'^\(')),  # todo
-    (9, re.compile(r'^\)')),
+    (9, re.compile(r'^\(')),  # todo
+    (10, re.compile(r'^\)')),
 
-    (10, re.compile(r'^\.')),
-    (11, re.compile(r'^,')),
+    (11, re.compile(r'^\.')),
+    (12, re.compile(r'^,')),
 
-    (12, re.compile(r'^-')),
-    (13, re.compile(r'^\+')),
-    (14, re.compile(r'^\*')),
-    (15, re.compile(r'^/')),
+    (13, re.compile(r'^-')),
+    (14, re.compile(r'^\+')),
+    (15, re.compile(r'^\*')),
+    (16, re.compile(r'^/')),
 
-    (16, re.compile(r'^=')),
-    (17, re.compile(r'^<')),
-    (18, re.compile(r'^>')),
+    (17, re.compile(r'^=')),
+    (18, re.compile(r'^<')),
+    (19, re.compile(r'^>')),
 )
 tokens = OrderedDict(_list_tokens)
 assert len(_list_tokens) == len(tokens)
@@ -48,7 +49,6 @@ def tokenize(text):
     :return: очередной токен
     """
     numline = 1
-    numcol = 0
     index = 0
     while index < len(text):
         is_found = False

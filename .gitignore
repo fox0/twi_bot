@@ -1,6 +1,3 @@
-.idea/
-venv/
-*.pyc
-*.c
-*.o
-*.so
+.idea
+venv
+twi_bot2/cache/*.py

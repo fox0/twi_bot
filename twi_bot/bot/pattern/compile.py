@@ -10,6 +10,14 @@ from twi_bot.bot.pattern.tokens import *
 log = logging.getLogger(__name__)
 
 
+def _get_filename_bytecode(filename_pattern):
+    return '%s_%d.pyc' % (os.path.abspath(filename_pattern), os.path.getmtime(filename_pattern))
+
+
+def _get_func_name(filename_pattern):
+    return 'pattern_' + os.path.basename(filename_pattern).rsplit('.', 1)[0].replace('.', '_')
+
+
 def load_pattern(filename_pattern, use_cache=True):
     """
     Загрузить паттерн из файла
@@ -30,9 +38,12 @@ def load_pattern(filename_pattern, use_cache=True):
             text = f.read()
 
         py = pattern2python(text, func_name)
-
+        with open('%s.py' % filename_pattern, 'w') as f:
+            f.write(py)
         log.debug('\n%s', py)
-        code = compile(py, '<%s>' % os.path.abspath(filename_pattern), 'exec')
+
+        # code = compile(py, '<%s>' % os.path.abspath(filename_pattern), 'exec')
+        code = compile(py, '%s.py' % os.path.abspath(filename_pattern), 'exec')
         if use_cache:
             with open(filename_bytecode, 'wb') as f:
                 marshal.dump(code, f)
@@ -40,14 +51,6 @@ def load_pattern(filename_pattern, use_cache=True):
     ns = {}
     exec code in ns
     return ns[func_name]
-
-
-def _get_filename_bytecode(filename_pattern):
-    return '%s_%s.pyc' % (os.path.abspath(filename_pattern), os.path.getmtime(filename_pattern))
-
-
-def _get_func_name(filename_pattern):
-    return 'pattern_' + os.path.basename(filename_pattern).rsplit('.', 1)[0].replace('.', '_')
 
 
 python_template = '''\
