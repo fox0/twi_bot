@@ -1,5 +1,3 @@
-.PHONY: installenv cleanenv clean
-
 installenv:
 	virtualenv --never-download --python=python2 venv;\
 	. venv/bin/activate;\
@@ -9,9 +7,6 @@ cleanvenv:
 	rm -rf venv
 
 clean:
+	rm -rf twi_bot2/cache/*
+	touch twi_bot2/cache/__init__.py
 	find . -name '*.pyc' -exec rm --force {} +
-	find . -name '*.o' -exec rm --force {} +
-	find . -name '*.so' -exec rm --force {} +
-
-runjupyter:
-	jupyter-notebook --no-browser

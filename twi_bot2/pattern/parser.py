@@ -1,13 +1,13 @@
 # coding: utf-8
-from twi_bot.bot.pattern.tokenize import tokenize, ParseError
-from twi_bot.bot.pattern.tokens import *
+from twi_bot2.pattern.tokenize import tokenize, ParseError
+from twi_bot2.pattern.tokens import *
 
 
 def pattern2python(text, func_name='func'):
     result = ['''\
 # coding: utf-8
 # DO NOT EDIT THIS!
-#__builtins__ = {}
+# __builtins__ = {}
 ''']
     args = []
 
@@ -83,7 +83,7 @@ def pattern2python(text, func_name='func'):
                 val = {
                     'function': 'def',
                     'elseif': 'elif',
-                    'return': 'yield',
+                    'act': 'yield',
                 }.get(tokval, tokval)
                 result.append(val)
                 continue
@@ -91,7 +91,7 @@ def pattern2python(text, func_name='func'):
     except StopIteration:
         r = ''.join(result)
         # удалить пустые строки
-        r2 = '\n'.join(line for line in r.split('\n') if line.strip())
-        r2 = r2.replace('def', '\n\ndef')
-        r2 = '%s\n' % r2
-        return args, r2
+        # r = '\n'.join(line for line in r.split('\n') if line.strip())
+        # r = r.replace('def', '\n\ndef')
+        r = '%s\n' % r
+        return args, r

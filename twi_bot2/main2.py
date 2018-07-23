@@ -8,7 +8,7 @@ log = logging.getLogger('twi_bot.main')
 
 
 def main():
-    filename = 'conf/example1.pattern'
+    filename = 'conf/example1.conf'
     funcname = 'example1'
     with open(filename) as f:
         args, text = pattern2python(f.read(), funcname)
