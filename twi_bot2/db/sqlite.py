@@ -22,20 +22,27 @@ db = DB()
 class Field(object):
     sql_type = ''
 
+    def __init__(self, pk=False, unique=False, null=False, default=None):
+        self.pk = pk
+        self.unique = unique
+        self.null = null
+        self.default = default
+
     def get_sql(self, name):
-        return '%s %s' % (name, self.sql_type)
+        result = [name, self.sql_type]
+        if self.pk:
+            result.append('PRIMARY KEY')
+        if self.unique:
+            result.append('UNIQUE')
+        if not self.null:
+            result.append('NOT NULL')
+        if self.default:
+            result.append('DEFAULT %s' % self.default)
+        return ' '.join(result)
 
 
 class FieldInteger(Field):
-    def __init__(self, pk=False):
-        self.pk = pk
-
-    @property
-    def sql_type(self):
-        result = 'INTEGER'
-        if self.pk:
-            result += ' PRIMARY KEY'
-        return result
+    sql_type = 'INTEGER'
 
 
 class FieldText(Field):
@@ -56,11 +63,16 @@ class FieldNumeric(Field):
 
 
 class FieldForeign(Field):
-    def __init__(self, model):
+    sql_type = 'INTEGER'  # ?
+
+    def __init__(self, model, **kwargs):
         self.model_name = model.__name__.lower()
+        super(FieldForeign, self).__init__(**kwargs)
 
     def get_sql(self, name):
-        return '%s INTEGER,\n  FOREIGN KEY(%s) REFERENCES %s(%s)' % (name, name, self.model_name, 'id')
+        result = super(FieldForeign, self).get_sql(name)
+        sql = 'FOREIGN KEY(%s) REFERENCES %s(%s)' % (name, self.model_name, 'id')
+        return ',\n  '.join((result, sql))
 
 
 class ModelMetaclass(type):
@@ -68,7 +80,7 @@ class ModelMetaclass(type):
         if name != 'Model':
             attrs['id'] = FieldInteger(pk=True)
             fields = [v.get_sql(k) for k, v in attrs.items() if isinstance(v, Field)]
-            sql = 'CREATE TABLE %s (\n  %s\n);' % (name.lower(), ',\n  '.join(fields))
+            sql = 'CREATE TABLE IF NOT EXISTS %s (\n  %s\n);' % (name.lower(), ',\n  '.join(fields))
             print(sql)
             attrs['sql_create_table'] = sql
             # todo replace fields
@@ -84,10 +96,10 @@ if __name__ == '__main__':
     # logging.basicConfig(level=logging.DEBUG)
 
     class Device(Model):
-        dev = FieldText()
+        name = FieldText()
 
     class Pattern(Model):
-        dev = FieldForeign(Device)
+        dev = FieldForeign(Device, null=False)
 
 
     cursor = db.conn.cursor()
