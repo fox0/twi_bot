@@ -1,3 +1,4 @@
 .idea
 venv
 twi_bot2/cache/*.py
+twi_bot2/db/*.sqlite
