@@ -94,4 +94,4 @@ def pattern2python(text, func_name='func'):
         # r = '\n'.join(line for line in r.split('\n') if line.strip())
         # r = r.replace('def', '\n\ndef')
         r = '%s\n' % r
-        return args, r
+        return tuple(args), r
