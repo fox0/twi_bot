@@ -20,27 +20,18 @@ db = DB()
 
 
 class Field(object):
-    def get_sql_type(self):
-        raise NotImplementedError
+    sql_type = ''
+
+    def get_sql(self, name):
+        return '%s %s' % (name, self.sql_type)
 
 
 class FieldInteger(Field):
-    """
-    INT
-    INTEGER
-    TINYINT
-    SMALLINT
-    MEDIUMINT
-    BIGINT
-    UNSIGNED BIG INT
-    INT2
-    INT8
-    """
-
     def __init__(self, pk=False):
         self.pk = pk
 
-    def get_sql_type(self):
+    @property
+    def sql_type(self):
         result = 'INTEGER'
         if self.pk:
             result += ' PRIMARY KEY'
@@ -48,76 +39,58 @@ class FieldInteger(Field):
 
 
 class FieldText(Field):
-    """
-    CHARACTER(20)
-    VARCHAR(255)
-    VARYING CHARACTER(255)
-    NCHAR(55)
-    NATIVE CHARACTER(70)
-    NVARCHAR(100)
-    TEXT
-    CLOB
-    """
-    pass
+    sql_type = 'TEXT'
 
 
 class FieldBlob(Field):
-    """
-    BLOB
-    """
-    pass
+    sql_type = 'BLOB'
 
 
 class FieldReal(Field):
-    """
-    REAL
-    DOUBLE
-    DOUBLE PRECISION
-    FLOAT
-    """
-    pass
+    sql_type = 'REAL'
 
 
 class FieldNumeric(Field):
-    """
-    NUMERIC
-    DECIMAL(10,5)
-    BOOLEAN
-    DATE
-    DATETIME
-    """
-    pass
+    # BOOLEAN, DATE, DATETIME
+    sql_type = 'NUMERIC'
+
+
+class FieldForeign(Field):
+    def __init__(self, model):
+        self.model_name = model.__name__.lower()
+
+    def get_sql(self, name):
+        return '%s INTEGER,\n  FOREIGN KEY(%s) REFERENCES %s(%s)' % (name, name, self.model_name, 'id')
 
 
 class ModelMetaclass(type):
     def __new__(mcs, name, bases, attrs):
-        fields = ['%s %s' % (k, v.get_sql_type()) for k, v in attrs.items() if isinstance(v, Field)]
-
-        def create_table():
-            sql = 'CREATE TABLE %s (%s)' % (name.lower(), ', '.join(fields))
-            # log.debug('%', sql)
+        if name != 'Model':
+            attrs['id'] = FieldInteger(pk=True)
+            fields = [v.get_sql(k) for k, v in attrs.items() if isinstance(v, Field)]
+            sql = 'CREATE TABLE %s (\n  %s\n);' % (name.lower(), ',\n  '.join(fields))
             print(sql)
-            cursor = db.conn.cursor()
-            cursor.execute(sql)
-            db.conn.commit()
-
-        attrs['create_table'] = staticmethod(create_table)
+            attrs['sql_create_table'] = sql
+            # todo replace fields
         return super(ModelMetaclass, mcs).__new__(mcs, name, bases, attrs)
 
 
 class Model(object):
     __metaclass__ = ModelMetaclass
-
-    @staticmethod
-    def create_table():
-        pass
+    sql_create_table = ''
 
 
 if __name__ == '__main__':
     # logging.basicConfig(level=logging.DEBUG)
 
-    class Model2(Model):
-        pk = FieldInteger(pk=True)
+    class Device(Model):
+        dev = FieldText()
+
+    class Pattern(Model):
+        dev = FieldForeign(Device)
 
 
-    Model2.create_table()
+    cursor = db.conn.cursor()
+    cursor.execute(Device.sql_create_table)
+    cursor.execute(Pattern.sql_create_table)
+    db.conn.commit()
