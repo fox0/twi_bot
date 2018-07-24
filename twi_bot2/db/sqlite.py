@@ -15,11 +15,28 @@ class DB(object):
     def __del__(self):
         self.conn.close()
 
+    @staticmethod
+    def sql_create_table(table, fields):
+        return 'CREATE TABLE IF NOT EXISTS %s (\n  %s\n);' % (table.lower(), ',\n  '.join(fields))
+
+    @staticmethod
+    def sql_primary_key(*fields):
+        return 'PRIMARY KEY(%s)' % (', '.join(fields))
+
+    @staticmethod
+    def sql_foreign_key(field, table2, field2='id'):
+        # todo ON DELETE
+        return 'FOREIGN KEY(%s) REFERENCES %s(%s)' % (field, table2, field2)
+
 
 db = DB()
 
 
-class Field(object):
+class AbstractField(object):
+    pass
+
+
+class Field(AbstractField):
     sql_type = ''
 
     def __init__(self, pk=False, unique=False, null=False, default=None):
@@ -38,7 +55,7 @@ class Field(object):
             result.append('NOT NULL')
         if self.default:
             result.append('DEFAULT %s' % self.default)
-        return ' '.join(result)
+        return [' '.join(result)]
 
 
 class FieldInteger(Field):
@@ -63,7 +80,7 @@ class FieldNumeric(Field):
 
 
 class FieldForeign(Field):
-    sql_type = 'INTEGER'  # ?
+    sql_type = 'INTEGER'
 
     def __init__(self, model, **kwargs):
         self.model_name = model.__name__.lower()
@@ -71,19 +88,49 @@ class FieldForeign(Field):
 
     def get_sql(self, name):
         result = super(FieldForeign, self).get_sql(name)
-        sql = 'FOREIGN KEY(%s) REFERENCES %s(%s)' % (name, self.model_name, 'id')
-        return ',\n  '.join((result, sql))
+        sql = DB.sql_foreign_key(name, self.model_name)
+        return result, sql
+
+
+class FieldManyToMany(AbstractField):
+    def __init__(self, model):
+        self.model = model
+
+    def get_sql(self, model_name2):
+        model_name1 = self.model.__name__.lower()
+        model_name2 = model_name2.lower()
+        table = ''.join((model_name1, model_name2))
+        f1, f2 = '%s_id' % model_name1, '%s_id' % model_name2
+        fields = [
+            ',\n  '.join(FieldInteger().get_sql(f1)),
+            ',\n  '.join(FieldInteger().get_sql(f2)),
+            DB.sql_primary_key(f1, f2),
+            DB.sql_foreign_key(f1, model_name1),
+            DB.sql_foreign_key(f2, model_name2),
+        ]
+        return DB.sql_create_table(table, fields)
 
 
 class ModelMetaclass(type):
     def __new__(mcs, name, bases, attrs):
         if name != 'Model':
+            sql = []
+            fields = []
             attrs['id'] = FieldInteger(pk=True)
-            fields = [v.get_sql(k) for k, v in attrs.items() if isinstance(v, Field)]
-            sql = 'CREATE TABLE IF NOT EXISTS %s (\n  %s\n);' % (name.lower(), ',\n  '.join(fields))
-            print(sql)
+            for k, v in attrs.items():
+                if not isinstance(v, AbstractField):
+                    continue
+                if isinstance(v, Field):
+                    fields.extend(v.get_sql(k))
+                elif isinstance(v, FieldManyToMany):
+                    sql.append(v.get_sql(name))
+                else:
+                    raise NotImplementedError
+
+            sql.insert(0, DB.sql_create_table(name, fields))
             attrs['sql_create_table'] = sql
             # todo replace fields
+
         return super(ModelMetaclass, mcs).__new__(mcs, name, bases, attrs)
 
 
@@ -98,11 +145,15 @@ if __name__ == '__main__':
     class Device(Model):
         name = FieldText()
 
+
     class Pattern(Model):
-        dev = FieldForeign(Device, null=False)
+        name = FieldText()
+        devices = FieldManyToMany(Device)
 
 
     cursor = db.conn.cursor()
-    cursor.execute(Device.sql_create_table)
-    cursor.execute(Pattern.sql_create_table)
+    for ls in Device.sql_create_table, Pattern.sql_create_table:
+        for sql in ls:
+            print(sql)
+            cursor.execute(sql)
     db.conn.commit()
