@@ -114,24 +114,32 @@ class FieldManyToMany(AbstractField):
 class ModelMetaclass(type):
     def __new__(mcs, name, bases, attrs):
         if name != 'Model':
-            sql = []
-            fields = []
             attrs['id'] = FieldInteger(pk=True)
+            attrs['sql_create_table'] = mcs.__get_sql_create_table(name, attrs)
+
+            # todo replace fields
             for k, v in attrs.items():
                 if not isinstance(v, AbstractField):
                     continue
-                if isinstance(v, Field):
-                    fields.extend(v.get_sql(k))
-                elif isinstance(v, FieldManyToMany):
-                    sql.append(v.get_sql(name))
-                else:
-                    raise NotImplementedError
-
-            sql.insert(0, DB.sql_create_table(name, fields))
-            attrs['sql_create_table'] = sql
-            # todo replace fields
 
         return super(ModelMetaclass, mcs).__new__(mcs, name, bases, attrs)
+
+    @staticmethod
+    def __get_sql_create_table(name, attrs):
+        result, fields = [], []
+        for k, v in attrs.items():
+            # AbstractField - Field - ...
+            # AbstractField - FieldManyToMany
+            if not isinstance(v, AbstractField):
+                continue
+            if isinstance(v, Field):
+                fields.extend(v.get_sql(k))
+            elif isinstance(v, FieldManyToMany):
+                result.append(v.get_sql(name))
+            else:
+                raise NotImplementedError
+        result.insert(0, DB.sql_create_table(name, fields))
+        return result
 
 
 class Model(object):
@@ -139,17 +147,13 @@ class Model(object):
     sql_create_table = ''
 
 
-if __name__ == '__main__':
-    # logging.basicConfig(level=logging.DEBUG)
-
+def test():
     class Device(Model):
         name = FieldText()
-
 
     class Pattern(Model):
         name = FieldText()
         devices = FieldManyToMany(Device)
-
 
     cursor = db.conn.cursor()
     for ls in Device.sql_create_table, Pattern.sql_create_table:
@@ -157,3 +161,11 @@ if __name__ == '__main__':
             print(sql)
             cursor.execute(sql)
     db.conn.commit()
+
+    d = Device()
+    a = 0
+
+
+if __name__ == '__main__':
+    # logging.basicConfig(level=logging.DEBUG)
+    test()
