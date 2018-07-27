@@ -17,7 +17,7 @@ class DB(object):
 
     @staticmethod
     def sql_create_table(table, fields):
-        return 'CREATE TABLE IF NOT EXISTS %s (\n  %s\n);' % (table.lower(), ',\n  '.join(fields))
+        return 'CREATE TABLE IF NOT EXISTS %s (\n  %s\n);' % (table, ',\n  '.join(fields))
 
     @staticmethod
     def sql_primary_key(*fields):
@@ -27,6 +27,11 @@ class DB(object):
     def sql_foreign_key(field, table2, field2='id'):
         # todo ON DELETE
         return 'FOREIGN KEY(%s) REFERENCES %s(%s)' % (field, table2, field2)
+
+    @staticmethod
+    def sql_insert(table, fields, values):
+        assert len(fields) == len(values)
+        return 'INSERT INTO %s (%s) VALUES(%s)' % (table, ', '.join(fields), ', '.join(values))
 
 
 db = DB()
@@ -57,13 +62,27 @@ class Field(AbstractField):
             result.append('DEFAULT %s' % self.default)
         return [' '.join(result)]
 
+    def to_str(self, value):
+        if value is None:
+            if not self.null:
+                raise ValueError('Not None')
+            else:
+                return 'null'
+        # raise NotImplementedError todo
+
 
 class FieldInteger(Field):
     sql_type = 'INTEGER'
 
+    def to_str(self, value):
+        return super(FieldInteger, self).to_str(value) or '%d' % int(value)
+
 
 class FieldText(Field):
     sql_type = 'TEXT'
+
+    def to_str(self, value):
+        return super(FieldText, self).to_str(value) or "'%s'" % value
 
 
 class FieldBlob(Field):
@@ -87,9 +106,9 @@ class FieldForeign(Field):
         super(FieldForeign, self).__init__(**kwargs)
 
     def get_sql(self, name):
-        result = super(FieldForeign, self).get_sql(name)
-        sql = DB.sql_foreign_key(name, self.model_name)
-        return result, sql
+        s1 = super(FieldForeign, self).get_sql(name)
+        s2 = DB.sql_foreign_key(name, self.model_name)
+        return s1, s2
 
 
 class FieldManyToMany(AbstractField):
@@ -114,37 +133,60 @@ class FieldManyToMany(AbstractField):
 class ModelMetaclass(type):
     def __new__(mcs, name, bases, attrs):
         if name != 'Model':
-            attrs['id'] = FieldInteger(pk=True)
-            attrs['sql_create_table'] = mcs.__get_sql_create_table(name, attrs)
-
-            # todo replace fields
-            for k, v in attrs.items():
-                if not isinstance(v, AbstractField):
-                    continue
-
+            mcs.init(attrs, name)
         return super(ModelMetaclass, mcs).__new__(mcs, name, bases, attrs)
 
     @staticmethod
-    def __get_sql_create_table(name, attrs):
-        result, fields = [], []
+    def init(attrs, name):
+        if 'id' not in attrs:
+            attrs['id'] = FieldInteger(pk=True, null=True)
+
+        fields = {}
         for k, v in attrs.items():
-            # AbstractField - Field - ...
-            # AbstractField - FieldManyToMany
-            if not isinstance(v, AbstractField):
-                continue
+            if isinstance(v, AbstractField):
+                fields[k] = v
+        attrs['__fields'] = fields
+
+        result, ls = [], []
+        for k, v in fields.items():
             if isinstance(v, Field):
-                fields.extend(v.get_sql(k))
+                ls.extend(v.get_sql(k))
             elif isinstance(v, FieldManyToMany):
                 result.append(v.get_sql(name))
             else:
                 raise NotImplementedError
-        result.insert(0, DB.sql_create_table(name, fields))
-        return result
+        result.insert(0, DB.sql_create_table(name.lower(), ls))
+        attrs['__sql_create_table'] = result
 
 
 class Model(object):
     __metaclass__ = ModelMetaclass
-    sql_create_table = ''
+
+    def __init__(self, **kwargs):
+        # fields = self.__fields
+        fields = self.__getattribute__('__fields')
+        for name in fields.keys():
+            self.__setattr__(name, None)
+        for name, v in kwargs.items():
+            if name not in fields.keys():
+                raise ValueError('field %d not exist in model' % name)
+            self.__setattr__(name, v)
+
+    def save(self):
+        fields = self.__getattribute__('__fields')
+        # is_insert = self.__getattribute__('__is_insert')
+        # is_update = self.__getattribute__('__is_update')
+        r1, r2 = [], []
+        for name, f in fields.items():
+            value = self.__getattribute__(name)
+            r1.append(name)
+            r2.append(f.to_str(value))
+
+        sql = db.sql_insert(self.__class__.__name__.lower(), r1, r2)
+        print(sql)
+        cursor = db.conn.cursor()
+        cursor.execute(sql)
+        db.conn.commit()
 
 
 def test():
@@ -154,16 +196,6 @@ def test():
     class Pattern(Model):
         name = FieldText()
         devices = FieldManyToMany(Device)
-
-    cursor = db.conn.cursor()
-    for ls in Device.sql_create_table, Pattern.sql_create_table:
-        for sql in ls:
-            print(sql)
-            cursor.execute(sql)
-    db.conn.commit()
-
-    d = Device()
-    a = 0
 
 
 if __name__ == '__main__':
