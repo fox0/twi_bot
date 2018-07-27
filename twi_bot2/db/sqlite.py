@@ -130,6 +130,33 @@ class FieldManyToMany(AbstractField):
         return DB.sql_create_table(table, fields)
 
 
+class Manager(object):
+    def __init__(self, table, fields):
+        self._table = table
+        self._fields = fields
+
+    def all(self):
+        result = []
+        fields = self._fields.keys()
+        sql = 'SELECT %s FROM %s' % (', '.join(fields), self._table)
+        print(sql)
+
+        cursor = db.conn.cursor()
+        cursor.execute(sql)
+        for i in cursor.fetchall():
+            d = {}
+            for k, v in zip(fields, i):
+                d[k] = v
+            result.append(d)
+        cursor.close()
+        return result
+
+
+class FakeManager(object):
+    def all(self):
+        return []
+
+
 class ModelMetaclass(type):
     def __new__(mcs, name, bases, attrs):
         if name != 'Model':
@@ -145,7 +172,9 @@ class ModelMetaclass(type):
         for k, v in attrs.items():
             if isinstance(v, AbstractField):
                 fields[k] = v
-        attrs['__fields'] = fields
+        attrs['_fields'] = fields
+
+        attrs['objects'] = Manager(name.lower(), fields)
 
         result, ls = [], []
         for k, v in fields.items():
@@ -156,36 +185,41 @@ class ModelMetaclass(type):
             else:
                 raise NotImplementedError
         result.insert(0, DB.sql_create_table(name.lower(), ls))
-        attrs['__sql_create_table'] = result
+        attrs['sql_create_table'] = result
 
 
 class Model(object):
     __metaclass__ = ModelMetaclass
+    _fields = {}
+    sql_create_table = ''
+    objects = FakeManager()
 
     def __init__(self, **kwargs):
-        # fields = self.__fields
-        fields = self.__getattribute__('__fields')
-        for name in fields.keys():
+        assert self._fields
+        assert self.sql_create_table
+        assert isinstance(self.objects, Manager)
+        for name in self._fields.keys():
             self.__setattr__(name, None)
-        for name, v in kwargs.items():
-            if name not in fields.keys():
+        for name, value in kwargs.items():
+            if name not in self._fields.keys():
                 raise ValueError('field %d not exist in model' % name)
-            self.__setattr__(name, v)
+            self.__setattr__(name, value)
 
     def save(self):
-        fields = self.__getattribute__('__fields')
         # is_insert = self.__getattribute__('__is_insert')
         # is_update = self.__getattribute__('__is_update')
         r1, r2 = [], []
-        for name, f in fields.items():
+        for name, f in self._fields.items():
             value = self.__getattribute__(name)
             r1.append(name)
             r2.append(f.to_str(value))
 
         sql = db.sql_insert(self.__class__.__name__.lower(), r1, r2)
         print(sql)
+
         cursor = db.conn.cursor()
-        cursor.execute(sql)
+        cursor.execute(sql)  # todo parameters
+        cursor.close()
         db.conn.commit()
 
 
@@ -196,6 +230,9 @@ def test():
     class Pattern(Model):
         name = FieldText()
         devices = FieldManyToMany(Device)
+
+    ls = Device.objects.all()
+    print(ls)
 
 
 if __name__ == '__main__':
