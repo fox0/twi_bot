@@ -1,0 +1,9 @@
+dev {
+    #coord_x
+    #coord_y
+}
+
+## Блок с кодом паттерна
+code {
+    #act 'stop', 0.5
+}
