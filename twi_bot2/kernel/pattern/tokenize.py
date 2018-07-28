@@ -1,7 +1,7 @@
 # coding: utf-8
 import re
 from collections import OrderedDict, namedtuple
-from twi_bot2.pattern.tokens import *
+from twi_bot2.kernel.pattern.tokens import *
 
 _list_tokens = (
     (TOK_ID, re.compile(r'^[\w_][\w\d_]*')),

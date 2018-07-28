@@ -1,5 +1,6 @@
 .idea
 venv
+twi_bot/config/patterns/*.py
 twi_bot2/cache/*.py
-twi_bot2/db/*.sqlite
-twi_bot2/db/*.sqlite-journal
+twi_bot2/kernel/db/*.sqlite
+twi_bot2/kernel/db/*.sqlite-journal

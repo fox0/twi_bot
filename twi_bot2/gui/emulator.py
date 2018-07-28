@@ -50,8 +50,8 @@ def main():
 
     timer = pygame.time.Clock()
     while True:
-        all_sprites.update()  # !
         timer.tick(TICK)
+        log.debug('tick')
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -59,6 +59,9 @@ def main():
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_ESCAPE:
                     sys.exit(0)
+
+        # all_sprites.update()  # !
+        bot.update()
 
         if IS_SHOW_BACKGROUND:
             screen.blit(background, (0, 0))
@@ -72,7 +75,8 @@ def main():
 
         for i in all_sprites:
             screen.blit(i.surf, i.rect)
-        pygame.display.flip()
+        # pygame.display.flip()
+        pygame.display.update()
 
 
 if __name__ == '__main__':

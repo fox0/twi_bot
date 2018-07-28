@@ -1,7 +1,7 @@
 # coding: utf-8
 import os
 import logging
-from twi_bot2.pattern.parser import pattern2python
+from twi_bot2.kernel.pattern.parser import pattern2python
 
 log = logging.getLogger(__name__)
 

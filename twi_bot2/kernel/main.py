@@ -1,8 +1,8 @@
 # coding: utf-8
 import logging
-from twi_bot2.pattern.load import get_patterns
+from twi_bot2.kernel.pattern.load import get_patterns
 
-log = logging.getLogger('twi_bot.main')
+log = logging.getLogger(__name__)
 
 
 def main():

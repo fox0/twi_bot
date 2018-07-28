@@ -1,6 +1,6 @@
 # coding: utf-8
-from twi_bot2.pattern.tokenize import tokenize, ParseError
-from twi_bot2.pattern.tokens import *
+from twi_bot2.kernel.pattern.tokenize import tokenize, ParseError
+from twi_bot2.kernel.pattern.tokens import *
 
 
 def pattern2python(text, func_name='func'):
