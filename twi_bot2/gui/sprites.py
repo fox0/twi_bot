@@ -1,7 +1,9 @@
 # coding: utf-8
-import pygame
 import logging
+import pygame
+
 from twi_bot2.kernel.pattern.load import get_patterns
+from twi_bot2.gui.dev import Dev
 
 log = logging.getLogger(__name__)
 
@@ -16,33 +18,38 @@ class AbstractSprite(pygame.sprite.Sprite):
         self.rect = pygame.Rect((x, y, size, size))
 
 
-class Wall(AbstractSprite):
+class WallSprite(AbstractSprite):
     color = 255, 0, 0
 
 
-class Goal(AbstractSprite):
+class GoalSprite(AbstractSprite):
     color = 0, 255, 0
 
 
-class Bot(AbstractSprite):
+class BotSprite(AbstractSprite):
     patterns = get_patterns(config_dir='../conf', cache_dir='../cache')
 
     # todo id
 
+    def __init__(self, *args, **kwargs):
+        super(BotSprite, self).__init__(*args, **kwargs)
+        self.dev = []
+
     def update(self):
         # log.debug('update bot')
-        dev = {
-            'coord_x': self.rect.x,
-            'coord_y': self.rect.y,
-            'goal_x': 280,  # todo
-            'goal_y': 160,
-        }
+        dev = {}
+        for i in self.dev:
+            assert isinstance(i, Dev)
+            dev[i.name] = i.read(self)  # todo
 
         acts = []
         for ls, pattern in self.patterns:
             kwargs = {}
             for i in ls:
-                kwargs[i] = dev[i]
+                try:
+                    kwargs[i] = dev[i]
+                except KeyError:
+                    log.error('unknown dev %s', i)
             log.debug('>>>%s, %s', pattern, kwargs)
             try:
                 for act, w in pattern(**kwargs):
@@ -51,17 +58,20 @@ class Bot(AbstractSprite):
             except BaseException as e:
                 log.exception(e)
 
-        # todo sum
-        step = 1
-        act = sorted(acts, key=lambda x: -x[1])[0][0]
-        log.debug('act=%s', act)
-        if act == 'go_right':
-            self.rect.x += step
-        elif act == 'go_left':
-            self.rect.x -= step
-        elif act == 'go_down':
-            self.rect.y += step
-        elif act == 'go_up':
-            self.rect.y -= step
-        else:
-            log.error('act=%s', act)
+        if acts:
+            # todo sum
+            step = 1
+            act = sorted(acts, key=lambda x: -x[1])[0][0]
+            log.debug('act=%s', act)
+            if act == 'go_right':
+                self.rect.x += step
+            elif act == 'go_left':
+                self.rect.x -= step
+            elif act == 'go_down':
+                self.rect.y += step
+            elif act == 'go_up':
+                self.rect.y -= step
+            else:
+                log.error('unknown act %s', act)
+
+        # todo pygame.sprite.collide_rect(self, p)

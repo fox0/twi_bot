@@ -3,7 +3,8 @@ import sys
 import logging
 import pygame
 
-from twi_bot2.gui.sprites import Goal, Wall, Bot
+from twi_bot2.gui.sprites import GoalSprite, WallSprite, BotSprite
+from twi_bot2.gui.dev import GoalDev, CoordXDev, CoordYDev
 
 log = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ def main():
     IS_SHOW_BACKGROUND = False
 
     pygame.init()
-    pygame.display.set_caption('twi_bot 0.3.0 by fox')
+    pygame.display.set_caption('twi_bot 0.3.1 by fox')
 
     screen = pygame.display.set_mode(SIZE)
     background = pygame.Surface(SIZE)
@@ -39,16 +40,29 @@ def main():
     )
     walls = pygame.sprite.Group()
     for x, y in w:
-        walls.add(Wall(x, y, STEP))
+        walls.add(WallSprite(x, y, STEP))
     all_sprites.add(walls)
 
-    goal = Goal(280, 160, STEP / 2)
+    goal = GoalSprite(280, 160, STEP / 2)
     all_sprites.add(goal)
 
-    bot = Bot(91, 212, STEP / 2)
+    bot = BotSprite(91, 212, STEP / 2)
+    bot.dev = [
+        GoalDev('goal_x', 280),
+        GoalDev('goal_y', 160),
+        CoordXDev('coord_x'),
+        CoordYDev('coord_y'),
+        # MapDev()
+    ]
     all_sprites.add(bot)
 
-    bot2 = Bot(10, 10, STEP / 2)
+    bot2 = BotSprite(10, 10, STEP / 2)
+    bot2.dev = [
+        GoalDev('goal_x', 280),
+        GoalDev('goal_y', 160),
+        CoordXDev('coord_x'),
+        CoordYDev('coord_y'),
+    ]
     all_sprites.add(bot2)
 
     timer = pygame.time.Clock()
