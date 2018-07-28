@@ -1,5 +1,6 @@
 # coding: utf-8
 import os
+import sys
 import logging
 from twi_bot2.kernel.pattern.parser import pattern2python
 
@@ -7,6 +8,7 @@ log = logging.getLogger(__name__)
 
 
 def get_patterns(config_dir='conf', cache_dir='cache'):
+    sys.stderr.writelines([os.path.abspath(config_dir), '\n'])
     result = []
     for filename in _get_configs(config_dir):
         config, _ = os.path.splitext(os.path.basename(filename))

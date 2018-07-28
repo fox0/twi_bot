@@ -24,9 +24,6 @@ def main():
 
     all_sprites = pygame.sprite.Group()
 
-    goal = Goal(280, 160, STEP / 2)
-    all_sprites.add(goal)
-
     w = (
         (80, 120),
         (100, 120),
@@ -45,13 +42,16 @@ def main():
         walls.add(Wall(x, y, STEP))
     all_sprites.add(walls)
 
+    goal = Goal(280, 160, STEP / 2)
+    all_sprites.add(goal)
+
     bot = Bot(91, 212, STEP / 2)
     all_sprites.add(bot)
 
     timer = pygame.time.Clock()
     while True:
         timer.tick(TICK)
-        log.debug('tick')
+        # log.debug('tick')
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -75,8 +75,8 @@ def main():
 
         for i in all_sprites:
             screen.blit(i.surf, i.rect)
-        # pygame.display.flip()
-        pygame.display.update()
+        pygame.display.flip()
+        # pygame.display.update()
 
 
 if __name__ == '__main__':
