@@ -53,17 +53,15 @@ class Bot(AbstractSprite):
 
         # todo sum
         step = 1
-        for act, _ in acts:
-            if act == 'go_right':
-                self.rect.x += step
-            elif act == 'go_left':
-                self.rect.x -= step
-            elif act == 'go_down':
-                self.rect.y += step
-            elif act == 'go_up':
-                self.rect.y -= step
-            else:
-                log.error('act=%s', act)
-
-        # todo не двигается спрайт!
-        log.debug('(%s, %s)', self.rect.x, self.rect.y)
+        act = sorted(acts, key=lambda x: -x[1])[0][0]
+        log.debug('act=%s', act)
+        if act == 'go_right':
+            self.rect.x += step
+        elif act == 'go_left':
+            self.rect.x -= step
+        elif act == 'go_down':
+            self.rect.y += step
+        elif act == 'go_up':
+            self.rect.y -= step
+        else:
+            log.error('act=%s', act)

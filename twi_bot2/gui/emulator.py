@@ -48,6 +48,9 @@ def main():
     bot = Bot(91, 212, STEP / 2)
     all_sprites.add(bot)
 
+    bot2 = Bot(10, 10, STEP / 2)
+    all_sprites.add(bot2)
+
     timer = pygame.time.Clock()
     while True:
         timer.tick(TICK)
@@ -60,8 +63,7 @@ def main():
                 if e.key == pygame.K_ESCAPE:
                     sys.exit(0)
 
-        # all_sprites.update()  # !
-        bot.update()
+        all_sprites.update()
 
         if IS_SHOW_BACKGROUND:
             screen.blit(background, (0, 0))
@@ -75,8 +77,7 @@ def main():
 
         for i in all_sprites:
             screen.blit(i.surf, i.rect)
-        pygame.display.flip()
-        # pygame.display.update()
+        pygame.display.update()
 
 
 if __name__ == '__main__':

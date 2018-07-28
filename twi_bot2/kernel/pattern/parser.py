@@ -18,7 +18,7 @@ def pattern2python(text, func_name='func'):
         if tokid in (TOK_COMMENT, TOK_NEWLINE, TOK_SPACE):
             continue
         if tokid != TOK_ID or tokval != 'dev':
-            raise ParseError(u"ожидалось 'dev', найдено '%s'" % tokval)
+            raise ParseError("ожидалось 'dev', найдено '%s'" % tokval)
         break
     # {
     while True:
@@ -26,7 +26,7 @@ def pattern2python(text, func_name='func'):
         if tokid in (TOK_COMMENT, TOK_NEWLINE, TOK_SPACE):
             continue
         if tokid != TOK_BEGIN_BLOCK:
-            raise ParseError(u"ожидалось '{', найдено '%s'" % tokval)
+            raise ParseError("ожидалось '{', найдено '%s'" % tokval)
         break
     # …}
     while True:
@@ -38,7 +38,7 @@ def pattern2python(text, func_name='func'):
             continue
         if tokid == TOK_END_BLOCK:
                 break
-        raise ParseError(u"ожидалось 'id' или '}', найдено '%s'" % tokval)
+        raise ParseError("ожидалось 'id' или '}', найдено '%s'" % tokval)
     result.append('def %s(%s):' % (func_name, ', '.join(args)))
 
     while True:
@@ -46,14 +46,14 @@ def pattern2python(text, func_name='func'):
         if tokid in (TOK_COMMENT, TOK_NEWLINE, TOK_SPACE):
             continue
         if tokid != TOK_ID or tokval != 'code':
-            raise ParseError(u"ожидалось 'code', найдено '%s'" % tokval)
+            raise ParseError("ожидалось 'code', найдено '%s'" % tokval)
         break
     while True:
         tokid, tokval = next(g)
         if tokid in (TOK_COMMENT, TOK_NEWLINE, TOK_SPACE):
             continue
         if tokid != TOK_BEGIN_BLOCK:
-            raise ParseError(u"ожидалось '{', найдено '%s'" % tokval)
+            raise ParseError("ожидалось '{', найдено '%s'" % tokval)
         break
 
     tabs = 4
