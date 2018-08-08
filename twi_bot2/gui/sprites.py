@@ -31,9 +31,10 @@ class BotSprite(AbstractSprite):
 
     # todo id
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, walls, *args, **kwargs):
         super(BotSprite, self).__init__(*args, **kwargs)
         self.dev = []
+        self.walls = walls
 
     def update(self):
         # log.debug('update bot')
@@ -65,13 +66,21 @@ class BotSprite(AbstractSprite):
             log.debug('act=%s', act)
             if act == 'go_right':
                 self.rect.x += step
+                if pygame.sprite.spritecollideany(self, self.walls):
+                    self.rect.x -= step
             elif act == 'go_left':
                 self.rect.x -= step
+                if pygame.sprite.spritecollideany(self, self.walls):
+                    self.rect.x += step
             elif act == 'go_down':
                 self.rect.y += step
+                if pygame.sprite.spritecollideany(self, self.walls):
+                    self.rect.y -= step
             elif act == 'go_up':
                 self.rect.y -= step
+                if pygame.sprite.spritecollideany(self, self.walls):
+                    self.rect.y += step
             else:
                 log.error('unknown act %s', act)
 
-        # todo pygame.sprite.collide_rect(self, p)
+    # def go(self):

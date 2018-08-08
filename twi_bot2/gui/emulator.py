@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def main():
-    TICK = 60
+    FPS = 10.0
     SIZE = 350, 350
     STEP = 20
     IS_SHOW_BACKGROUND = False
@@ -46,7 +46,7 @@ def main():
     goal = GoalSprite(280, 160, STEP / 2)
     all_sprites.add(goal)
 
-    bot = BotSprite(91, 212, STEP / 2)
+    bot = BotSprite(walls, 91, 212, STEP / 2)
     bot.dev = [
         GoalDev('goal_x', 280),
         GoalDev('goal_y', 160),
@@ -56,7 +56,7 @@ def main():
     ]
     all_sprites.add(bot)
 
-    bot2 = BotSprite(10, 10, STEP / 2)
+    bot2 = BotSprite(walls, 10, 10, STEP / 2)
     bot2.dev = [
         GoalDev('goal_x', 280),
         GoalDev('goal_y', 160),
@@ -67,8 +67,7 @@ def main():
 
     timer = pygame.time.Clock()
     while True:
-        timer.tick(TICK)
-        # log.debug('tick')
+        timer.tick(FPS)
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
