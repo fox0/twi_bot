@@ -1,5 +1,6 @@
 .idea
 venv
+*.pyc
 twi_bot/config/patterns/*.py
 twi_bot2/cache/*.py
 twi_bot2/kernel/db/*.sqlite
