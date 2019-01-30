@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def main():
-    FPS = 10.0
+    FPS = 60.0
     SIZE = 350, 350
     STEP = 20
     IS_SHOW_BACKGROUND = False
